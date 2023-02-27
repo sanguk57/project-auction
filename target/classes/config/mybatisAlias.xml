@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0/EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<typeAliases>
+		<typeAlias type="com.myauct.web.domain.user.dto.UserDTO" alias="UserDTO"/>
+		<typeAlias type="com.myauct.web.domain.auctmaster.dto.AuctMasterDTO" alias="AuctMasterDTO"/>
+		<typeAlias type="com.myauct.web.domain.auctboard.dto.AuctBoardDTO" alias="AuctBoardDTO"/>
+		<typeAlias type="com.myauct.web.domain.auctboard.dto.AuctBoardMemoDTO" alias="AuctBoardMemoDTO"/>
+		<typeAlias type="com.myauct.web.domain.auctcategory.dto.AuctCategoryDTO" alias="AuctCategoryDTO"/>
+		<typeAlias type="com.myauct.web.domain.auctconcern.dto.AuctConcernDTO" alias="AuctConcernDTO"/>
+		<typeAlias type="com.myauct.web.domain.auctmaster.dto.AuctFileUploadDTO" alias="AuctFileUploadDTO"/>
+		<typeAlias type="com.myauct.web.domain.user.service.global.util.PagingDTO" alias="PagingDTO"/>
+	</typeAliases>
+</configuration>

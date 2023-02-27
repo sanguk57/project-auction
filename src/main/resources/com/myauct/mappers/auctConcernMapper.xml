@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.myauct.web.domain.auctconcern.dao.AuctConcernDAO">
+	<insert id="createConcnern">
+	insert into Auct_Concern (anum, unum) VALUES (#{anum}, #{unum})
+	</insert>
+	
+	<delete id="deleteConcnern">
+		DELETE FROM Auct_Concern where anum = #{anum} and unum = #{unum}
+	</delete>
+	
+	<select id="concernList" resultType="AuctConcernDTO">
+		select * from Auct_Concern where unum = #{unum}
+	</select>
+	
+	<select id="concernCnt" resultType="_int">
+		select count(*) from Auct_Concern where unum = #{unum}
+	</select>
+	
+	</mapper>

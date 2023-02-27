@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.myauct.web.domain.user.dao.UserDAO">
+  <!-- com.myauct.web.domain.user.dto.UserDTO-->
+ <select id="getUserList" resultType="UserDTO">
+ 	select * from User_List 
+ </select>
+
+  <insert id="userRegister">
+  insert into User_List (user_id, phone, addr, gender, name, password, email, age)
+  values (#{user_id}, #{phone}, #{addr}, #{gender}, #{name}, #{password}, #{email}, #{age})
+ </insert>
+ 
+  <select id="userIdChk" resultType="integer">
+  select count(#{user_id}) from User_List where user_id = #{user_id}
+  </select>
+  
+  <select id="userPwChk" resultType="integer">
+  select count(*) from User_List where password = #{password}
+  </select>
+  
+  <select id="userChk" resultType="integer">
+  select count(#{user_id}) from User_List
+  where user_id = #{user_id} and password = #{password}
+  </select>
+  
+  <select id ="getUserId" resultType="string">
+  select user_id from User_List where name = #{name} and phone = #{phone} 
+  </select>
+  
+  <select id="getUnum" resultType="integer">
+  select unum from User_List where user_id = #{user_id} and phone = #{phone}
+  </select>
+  
+  <update id ="modifyUserPw">
+  update User_List set password = #{password} where unum = #{unum}
+  </update>
+  
+  <select id="getUser" resultType="UserDTO">
+	select * from User_List where user_id = #{user_id}  
+  </select>
+  
+  <select id="getName" resultType="string">
+  	select name from User_List where unum = #{unum}
+  </select>
+  
+  </mapper>

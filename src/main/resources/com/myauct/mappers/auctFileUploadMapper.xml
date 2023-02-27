@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.myauct.web.domain.auctmaster.dao.AuctFileUploadDAO">
+
+	<select id="fileList"
+		resultType="AuctFileUploadDTO">
+		select * from `Auct_FileUpload` where anum = #{anum}
+	</select>
+
+	<insert id="fileUpload">
+		insert into Auct_FileUpload (anum, upload_path,
+		file_name, file_dname, file_ext)
+		values (#{anum}, #{upload_path},
+		#{file_name}, #{file_dname}, #{file_ext})
+	</insert>
+
+	<select id="getUploadFile"
+		resultType="AuctFileUploadDTO">
+		select * from Auct_FileUpload where anum = #{anum}
+	</select>
+
+	<update id="modifyFile">
+		update Auct_FileUpload set upload_path =
+		#{upload_path}, file_name = #{file_name}, file_dname = #{file_dname}
+	</update>
+</mapper>

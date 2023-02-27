@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.myauct.web.domain.auctmaster.dao.AuctMasterJoinDAO">
+    
+	<insert id="auctionApplicant"  >
+	insert  into Auct_Master_join (unum, anum, amount, volume) VALUES(#{unum}, #{anum}, #{amount}, #{volume})
+	<selectKey order="AFTER" keyProperty="jnum"
+			resultType="_int">
+			select count(jnum) from `Auct_Master_join`;
+		</selectKey>
+	</insert>
+	
+	<update id="modifyApplicant">
+	update Auct_Master_join set  unum=#{unum}, anum=#{anum}, amount=#{amount}, volume=#{volume} where jnum=#{jnum} 
+	</update>
+	</mapper>

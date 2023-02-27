@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.myauct.web.domain.auctmaster.dao.AuctMasterDAO">
+
+
+
+
+
+
+	<select id="getProductList"
+		resultType="AuctMasterDTO" parameterType="PagingDTO">
+			SELECT C.* FROM 
+(SELECT B.* FROM
+(SELECT @rownum:= @rownum + 1 RN, A.* 
+<choose>
+<when test="key == 'A'.toString()">
+from `Auct_Master` A, (select @rownum:=0) TMP where A.unum = #{unum} ORDER BY limit_amt desc) B) C
+</when>
+<when test="key == 'B'.toString()">
+from `Auct_Master` A INNER JOIN `Auct_Concern` B ON A.anum = B.`anum`, (select @rownum:=0) TMP where B.`unum` = #{unum}
+ORDER BY limit_amt desc) B) C
+</when>
+    <when test="value != null and value != ''">
+from `Auct_Master` A INNER JOIN `Auct_Category` B ON A.cnum = B.cnum, (select @rownum:=0) TMP where A.prod_name Like CONCAT('%',#{value},'%') OR B.category Like CONCAT('%',#{value},'%') ORDER BY limit_amt desc) B) C
+    </when>
+    <otherwise>
+from `Auct_Master` A, (select @rownum:=0) TMP ORDER BY limit_amt desc) B) C
+    </otherwise>
+  </choose>
+WHERE RN BETWEEN #{start} AND #{end};
+	</select>
+	
+	<select id="getProduct" resultType="AuctMasterDTO">
+		select * from `Auct_Master` where anum = #{anum}
+	</select>
+	
+	<select id="getProductAmt" resultType="_int">
+		select start_amt from `Auct_Master` where anum = #{anum}
+	</select>
+	
+	<update id="modifyProductAmt">
+		update Auct_Master set start_amt =  #{start_amt}, join_cnt = #{join_cnt} where anum = #{anum}
+	</update>
+	
+	<insert id="createProduct">
+		insert into Auct_Master (unum, cnum, prod_title, prod_name, sales_addr,
+		prod_type,
+		as_type, start_amt, limit_type, limit_amt, join_amt,
+		curr_amt,
+		auct_start, auct_end, trans_type, prod_img, con_html,
+		contents, total_cnt)
+		values (#{unum}, #{cnum}, #{prod_title}, #{prod_name}, #{sales_addr},
+		#{prod_type},
+		#{as_type}, #{start_amt}, #{limit_type}, #{limit_amt},
+		#{join_amt},
+		#{curr_amt}, #{auct_start}, #{auct_end}, #{trans_type},
+		#{prod_img},
+		#{con_html}, #{contents}, #{total_cnt})
+		
+		<selectKey order="AFTER" keyProperty="anum"
+			resultType="int">
+			select MAX(anum) from `Auct_Master`
+		</selectKey>
+	</insert>
+	
+	<select id="getProductCnt" resultType="_int" parameterType="string">
+	select count(*) from `Auct_Master` A INNER JOIN `Auct_Category` B ON A.cnum = B.cnum
+	where prod_name Like CONCAT('%',#{value},'%') OR category Like CONCAT('%',#{value},'%')
+	</select>
+	
+	<select id="getUserProductCnt" resultType="_int">
+	select count(*) from `Auct_Master` where unum = #{unum}
+	</select>
+	
+	<delete id="deleteProduct">
+	DELETE FROM Auct_Master WHERE anum = #{anum}
+	</delete>
+	
+	<update id="moidfyProduct">
+		update Auct_Master set cnum = #{cnum}, prod_title#{prod_title}, prod_name=#{prod_name}, sales_addr = #{sales_addr},
+		prod_type = #{prod_type}, as_type = #{as_type}, start_amt = #{start_amt}, limit_type = #{limit_type}, limit_amt = #{limit_amt},
+		join_amt = #{join_amt}, curr_amt = #{curr_amt}, auct_start = #{auct_start}, auct_end = #{auct_end}, trans_type = #{trans_type},
+		con_html = #{con_html},contents = #{contents} 
+		where anum = #{anum}
+	</update>
+	
+</mapper>

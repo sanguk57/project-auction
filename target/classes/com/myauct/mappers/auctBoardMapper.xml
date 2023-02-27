@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.myauct.web.domain.auctboard.dao.AuctBoardDAO">
+	<insert id="createBoard">
+	insert into Auct_Board (unum, anum, subject, contents) values (#{unum}, #{anum}, #{subject}, #{contents})
+	</insert>
+	
+	<select id="boardList" resultType="AuctBoardDTO">
+		select * from Auct_Board
+	</select>
+	
+	<select id="getBoardTotal" resultType="_int">
+		select count(*) from Auct_Board
+	</select> 
+	
+	<select id="userBoardCnt" resultType="_int">
+		select count(*) from Auct_Board where unum = #{unum}
+	</select>
+	
+	</mapper>
