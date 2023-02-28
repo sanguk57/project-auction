@@ -90,14 +90,14 @@ a {
 					</div>
 
 				</div>
-				<ul class="d-flex justify-content-evenly mt-3">
+			<%-- 	<ul class="d-flex justify-content-evenly mt-3">
 					<li><a href="#" class="api-btn"><img
 							src="${path}/images/kakao-talk.png"></a></li>
 					<li><a href="#"><img src="${path}/images/naver.png" alt=""></a></li>
 					<li><a href="#"><img src="${path}/images/google.png" alt=""></a></li>
 					<li><a href="#"><img src="${path}/images/facebook.png" alt=""></a></li>
 					<li><a href="#"><img src="${path}/images/twitter.png" alt=""></a></li>
-				</ul>
+				</ul> --%>
 				<p class="mt-3 mb-3 text-muted">&copy; 2017 & 2022</p>
 			</form>
 		</main>

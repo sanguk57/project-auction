@@ -455,6 +455,7 @@
 			if (distEt < 0) {
 				clearInterval(timer);
 				document.getElementById(id).textContent = '경매가 마감 되었습니다.';
+				document.getElementById(service-details).disabled = true;
 				return;
 			}
 			var days = Math.floor(distEt / _day);

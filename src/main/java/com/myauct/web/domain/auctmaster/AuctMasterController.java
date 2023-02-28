@@ -2,12 +2,7 @@ package com.myauct.web.domain.auctmaster;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,7 +14,6 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.format.datetime.joda.LocalDateTimeParser;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -77,10 +71,10 @@ public class AuctMasterController {
 	@RequestMapping("/index")
 	public void index(
 			 HttpSession session, Model model, PagingDTO pagingDTO,
-			@RequestParam(value="value", required=false) String value,
+			 @RequestParam(value="value", required=false, defaultValue="") String value,
 			@RequestParam(value="key", required=false) String key,
-			@RequestParam(value="nowPage", required=false) String nowPage,
-			@RequestParam(value="cntPerPage", required=false) String cntPerPage) {
+			@RequestParam(defaultValue = "1") int nowPage,
+			@RequestParam(defaultValue = "4") int cntPerPage) {
 		
 		Map<String, Integer> cntMap = new HashMap<String, Integer>();
 		// 세션에 로그인 회원 정보 보관
@@ -90,17 +84,6 @@ public class AuctMasterController {
 		int concernCnt = 0;
 		int boardCnt = 0;
 		int total  = 0;
-		
-		if(value == null) value = "";
-		
-		if (nowPage == null && cntPerPage == null) {
-			nowPage = "1";
-			cntPerPage = "4";
-		} else if (nowPage == null) {
-			nowPage = "1";
-		} else if (cntPerPage == null) { 
-			cntPerPage = "4";
-		}
 		
 		if(session.getAttribute("user") != null) {			
 			UserDTO dto = (UserDTO) session.getAttribute("user");
@@ -118,25 +101,27 @@ public class AuctMasterController {
 			boardCnt = auctBoardService.userBoardCnt(unum);
 			cntMap.put("userBoardCnt", boardCnt);
 
-			if(key != null && key.equals("A")) {
-				pagingDTO = new PagingDTO(userProductCnt, Integer.parseInt(nowPage), Integer.parseInt(cntPerPage), value, key, unum);
-				model.addAttribute("paging", pagingDTO);
-			}
-				else if(key != null && key.equals("B")) {
-					pagingDTO = new PagingDTO(concernCnt, Integer.parseInt(nowPage), Integer.parseInt(cntPerPage), value, key, unum);
-					model.addAttribute("paging", pagingDTO);
-				}
-			
-			else {
-				pagingDTO = new PagingDTO(total, Integer.parseInt(nowPage), Integer.parseInt(cntPerPage), value, key, unum);
-				model.addAttribute("paging", pagingDTO);
-			}
-		}else {
-			total = auctMasterService.getProductCnt(value);
-			cntMap.put("productCnt", total);
-			
-			pagingDTO = new PagingDTO(total, Integer.parseInt(nowPage), Integer.parseInt(cntPerPage), value, key, unum);
-			model.addAttribute("paging", pagingDTO);
+		    if(key != null) {
+		        if(key.equals("A")) {
+		            pagingDTO = new PagingDTO(userProductCnt, nowPage, cntPerPage, value, key, unum);
+		            model.addAttribute("paging", pagingDTO);
+		        } else if(key.equals("B")) {
+		            pagingDTO = new PagingDTO(concernCnt, nowPage, cntPerPage, value, key, unum);
+		            model.addAttribute("paging", pagingDTO);
+		        } else {
+		            pagingDTO = new PagingDTO(total, nowPage, cntPerPage, value, key, unum);
+		            model.addAttribute("paging", pagingDTO);
+		        }
+		    } else {
+		        pagingDTO = new PagingDTO(total, nowPage, cntPerPage, value, key, unum);
+		        model.addAttribute("paging", pagingDTO);
+		    }
+		} else {
+		    total = auctMasterService.getProductCnt(value);
+		    cntMap.put("productCnt", total);
+		    
+		    pagingDTO = new PagingDTO(total, nowPage, cntPerPage, value, key, unum);
+		    model.addAttribute("paging", pagingDTO);
 		}
 		
 		
@@ -147,10 +132,10 @@ public class AuctMasterController {
 
 	@GetMapping("/about")
 	public void about( HttpSession session, Model model, PagingDTO pagingDTO,
-			@RequestParam(value="value", required=false) String value,
+			@RequestParam(value="value", required=false, defaultValue="") String value,
 			@RequestParam(value="key", required=false) String key,
-			@RequestParam(value="nowPage", required=false) String nowPage,
-			@RequestParam(value="cntPerPage", required=false) String cntPerPage) {
+			@RequestParam(defaultValue = "1") int nowPage,
+			@RequestParam(defaultValue = "12") int cntPerPage) {
 		
 		Map<String, Integer> cntMap = new HashMap<String, Integer>();
 		// 세션에 로그인 회원 정보 보관
@@ -160,17 +145,6 @@ public class AuctMasterController {
 		int concernCnt = 0;
 		int boardCnt = 0;
 		int total  = 0;
-		
-		if(value == null) value = "";
-		
-		if (nowPage == null && cntPerPage == null) {
-			nowPage = "1";
-			cntPerPage = "12";
-		} else if (nowPage == null) {
-			nowPage = "1";
-		} else if (cntPerPage == null) { 
-			cntPerPage = "12";
-		}
 		
 		if(session.getAttribute("user") != null) {			
 			UserDTO dto = (UserDTO) session.getAttribute("user");
@@ -188,26 +162,28 @@ public class AuctMasterController {
 			boardCnt = auctBoardService.userBoardCnt(unum);
 			cntMap.put("userBoardCnt", boardCnt);
 
-			if(key != null && key.equals("A")) {
-				pagingDTO = new PagingDTO(userProductCnt, Integer.parseInt(nowPage), Integer.parseInt(cntPerPage), value, key, unum);
-				model.addAttribute("paging", pagingDTO);
+			  if(key != null) {
+			        if(key.equals("A")) {
+			            pagingDTO = new PagingDTO(userProductCnt, nowPage, cntPerPage, value, key, unum);
+			            model.addAttribute("paging", pagingDTO);
+			        } else if(key.equals("B")) {
+			            pagingDTO = new PagingDTO(concernCnt, nowPage, cntPerPage, value, key, unum);
+			            model.addAttribute("paging", pagingDTO);
+			        } else {
+			            pagingDTO = new PagingDTO(total, nowPage, cntPerPage, value, key, unum);
+			            model.addAttribute("paging", pagingDTO);
+			        }
+			    } else {
+			        pagingDTO = new PagingDTO(total, nowPage, cntPerPage, value, key, unum);
+			        model.addAttribute("paging", pagingDTO);
+			    }
+			} else {
+			    total = auctMasterService.getProductCnt(value);
+			    cntMap.put("productCnt", total);
+			    
+			    pagingDTO = new PagingDTO(total, nowPage, cntPerPage, value, key, unum);
+			    model.addAttribute("paging", pagingDTO);
 			}
-				else if(key != null && key.equals("B")) {
-					pagingDTO = new PagingDTO(concernCnt, Integer.parseInt(nowPage), Integer.parseInt(cntPerPage), value, key, unum);
-					model.addAttribute("paging", pagingDTO);
-				}
-			
-			else {
-				pagingDTO = new PagingDTO(total, Integer.parseInt(nowPage), Integer.parseInt(cntPerPage), value, key, unum);
-				model.addAttribute("paging", pagingDTO);
-			}
-		}else {
-			total = auctMasterService.getProductCnt(value);
-			cntMap.put("productCnt", total);
-			
-			pagingDTO = new PagingDTO(total, Integer.parseInt(nowPage), Integer.parseInt(cntPerPage), value, key, unum);
-			model.addAttribute("paging", pagingDTO);
-		}
 		
 		
 		List<AuctMasterDTO> productList = auctMasterService.getProductList(pagingDTO);

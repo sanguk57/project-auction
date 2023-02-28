@@ -198,7 +198,7 @@ to {
 									<span data-purecounter-start="0"
 										data-purecounter-end="${cntMap.userBoardCnt}"
 										data-purecounter-duration="2" class="purecounter"></span>
-									<p>내 게시글 댓글수</p>
+									<p>내 경매품 댓글수</p>
 								</div>
 							</div>
 						</c:if>
