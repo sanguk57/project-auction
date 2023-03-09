@@ -50,15 +50,13 @@ WHERE RN BETWEEN #{start} AND #{end};
 		prod_type,
 		as_type, start_amt, limit_type, limit_amt, join_amt,
 		curr_amt,
-		auct_start, auct_end, trans_type, prod_img, con_html,
-		contents, total_cnt)
+		auct_start, auct_end, trans_type, contents, total_cnt)
 		values (#{unum}, #{cnum}, #{prod_title}, #{prod_name}, #{sales_addr},
 		#{prod_type},
 		#{as_type}, #{start_amt}, #{limit_type}, #{limit_amt},
 		#{join_amt},
 		#{curr_amt}, #{auct_start}, #{auct_end}, #{trans_type},
-		#{prod_img},
-		#{con_html}, #{contents}, #{total_cnt})
+		#{contents}, #{total_cnt})
 		
 		<selectKey order="AFTER" keyProperty="anum"
 			resultType="int">
@@ -83,7 +81,7 @@ WHERE RN BETWEEN #{start} AND #{end};
 		update Auct_Master set cnum = #{cnum}, prod_title#{prod_title}, prod_name=#{prod_name}, sales_addr = #{sales_addr},
 		prod_type = #{prod_type}, as_type = #{as_type}, start_amt = #{start_amt}, limit_type = #{limit_type}, limit_amt = #{limit_amt},
 		join_amt = #{join_amt}, curr_amt = #{curr_amt}, auct_start = #{auct_start}, auct_end = #{auct_end}, trans_type = #{trans_type},
-		con_html = #{con_html},contents = #{contents} 
+		contents = #{contents} 
 		where anum = #{anum}
 	</update>
 	

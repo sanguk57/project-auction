@@ -12,4 +12,6 @@ public interface AuctFileUploadDAO {
 	List<AuctFileUploadDTO> fileList(int anum);
 	
 	AuctFileUploadDTO getUploadFile(int fnum);
+	
+	Integer deleteFile(int anum);
 }

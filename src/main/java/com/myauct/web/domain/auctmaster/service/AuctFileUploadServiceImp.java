@@ -37,6 +37,9 @@ public class AuctFileUploadServiceImp  implements AuctFileUploadService{
 		return auctFileUploadDAO.fileList(anum);
 	}
 
-
+	@Override
+	public Integer deleteFile(int anum) {
+		return auctFileUploadDAO.deleteFile(anum);
+	}
 
 }

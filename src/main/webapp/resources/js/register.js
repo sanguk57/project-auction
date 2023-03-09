@@ -142,7 +142,7 @@ btn_sm.addEventListener("click", (e) => {
 btn_idck.addEventListener("click", () => {
   const id = inId.value;
 
-  fetch("http://localhost:8989/web/rest/userIdChk",{
+  fetch("/web/rest/userIdChk",{
    method: "POST",
   headers: {
     "Content-Type": "application/json",

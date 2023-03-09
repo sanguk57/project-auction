@@ -26,4 +26,8 @@
 		update Auct_FileUpload set upload_path =
 		#{upload_path}, file_name = #{file_name}, file_dname = #{file_dname}
 	</update>
+	
+	<delete id="deleteFile">
+		delete from Auct_FileUpload where anum = #{anum}
+	</delete>
 </mapper>

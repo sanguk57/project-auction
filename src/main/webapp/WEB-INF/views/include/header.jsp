@@ -26,7 +26,7 @@
 								<ul class="dropdown-menu">
 									<li><a class="dropdown-item" href="#">내 정보수정</a></li>
 									<li><a class="dropdown-item" href="productEnrollment">물품 등록</a></li>
-									<li><a class="dropdown-item" href="#">관심물품</a></li>
+									<li><a class="dropdown-item" href="/web/aucts/index?key=B">관심물품</a></li>
 									<li><a class="dropdown-item" href="#">내 문의글</a></li>
 									<li><a class="dropdown-item" href="#">답변</a></li>
 									<li><a class="dropdown-item" href="/web/users/logout">로그아웃</a></li>

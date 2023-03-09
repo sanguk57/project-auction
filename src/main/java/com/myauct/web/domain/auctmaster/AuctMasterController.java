@@ -2,6 +2,11 @@ package com.myauct.web.domain.auctmaster;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -241,6 +246,25 @@ public class AuctMasterController {
 	@GetMapping("/deleteProduct")
 	public String deleteProduct (int anum) {
 		 auctMasterService.deleteProduct(anum);
+		 List<AuctFileUploadDTO> imgFileLists = auctFileUploadService.fileList(anum);
+		 for(AuctFileUploadDTO fileDTO : imgFileLists) {
+		 Path filePath1 = Paths.get("/kuk2028/tomcat/webapps/upload/"+fileDTO.getUpload_path()+"/"+fileDTO.getFile_name()+"_"+fileDTO.getFile_dname()+fileDTO.getFile_ext());
+		 Path filePath2 = Paths.get("/kuk2028/tomcat/webapps/upload/"+fileDTO.getUpload_path()+"/"+"s_"+fileDTO.getFile_name()+"_"+fileDTO.getFile_dname()+fileDTO.getFile_ext());
+	        try {
+	            // 파일 삭제
+	            Files.delete(filePath1);
+	            Files.delete(filePath2);
+	            
+	        } catch (NoSuchFileException e) {
+	            System.out.println("삭제하려는 파일/디렉토리가 없습니다");
+	        } 
+	         catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	        
+		 }
+	        
+		 auctFileUploadService.deleteFile(anum);
 		return "redirect:/aucts/index";
 	}
 	
@@ -262,7 +286,6 @@ public class AuctMasterController {
 		Date date = new Date();
 		String str = sdf.format(date);
 		String datePath = str.replace("-", File.separator);
-
 		String uploadFolder = File.separator + "Users" + File.separator + "Kungas_57" + File.separator + "Desktop"
 				+ File.separator + "study_java" + File.separator + "Spring_STS" + File.separator + "myAuct"
 				+ File.separator + "src" + File.separator + "main" + File.separator + "webapp" + File.separator
