@@ -15,7 +15,7 @@
   
 
  ### 🎯프로그램 구현
-  1.  로그인페이지 ()
+  1.  로그인페이지
   ![image](https://user-images.githubusercontent.com/125232122/227454929-1e2b8fca-749c-45e5-b93b-6afc5e9b624c.png)
   2.  경매상품 목록
   ![image](https://user-images.githubusercontent.com/125232122/227456547-fee18675-6012-4361-9b6b-8853eb180c06.png)
@@ -25,6 +25,7 @@
   5. 경매 시작
   ![image](https://user-images.githubusercontent.com/125232122/227461995-f6a590f6-36b6-425a-9cca-4db4c724b2a9.png)
   6. 경매현황
+  ![image](https://user-images.githubusercontent.com/125232122/227687324-8ce5247c-200a-42df-bea8-566d5c4dbbec.png)
   
  ### 🔖주요데이터 흐름
   1.  경매시스템 구성
