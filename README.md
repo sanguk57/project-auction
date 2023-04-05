@@ -10,6 +10,8 @@
       * 서버 : Apache Tomcat 9.0
       * DB : MySQL
       * 편집툴 : STS, Sequel Pro
+ 
+ ### 사이트 URL (http://kuk2028.cafe24.com/aucts/index)
 
 ### 프로젝트 구성
   
