@@ -13,5 +13,5 @@
 
  ### 🙋‍♂️세부설명
  
-   [클릭]https://sang-wook.tistory.com/13
+   [클릭](https://sang-wook.tistory.com/13)
  
