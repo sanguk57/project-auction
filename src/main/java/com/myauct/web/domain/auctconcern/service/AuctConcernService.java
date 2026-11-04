@@ -2,16 +2,15 @@ package com.myauct.web.domain.auctconcern.service;
 
 import java.util.List;
 
-import org.apache.ibatis.annotations.Param;
-
-import com.myauct.web.domain.auctconcern.dto.AuctConcernDTO;
-
 public interface AuctConcernService {
-Integer createConcnern(AuctConcernDTO auctConcernDTO);
-	
-	Integer deleteConcnern(@Param("anum") int anum, @Param("unum") int unum);
-	
-	List<AuctConcernDTO> concernList(int unum);
-	
-	Integer concernCnt(int unum);
+
+	/** 이미 찜한 상품이면 아무것도 하지 않음 (예전에는 누를 때마다 중복 저장) */
+	void addConcern(int anum, int unum);
+
+	void removeConcern(int anum, int unum);
+
+	/** 찜한 상품 번호 목록 */
+	List<Integer> concernAnumList(int unum);
+
+	int concernCnt(int unum);
 }

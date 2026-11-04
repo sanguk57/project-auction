@@ -8,29 +8,50 @@
 		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
 
 	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
-	
+	<context:property-placeholder location="classpath:config/app.properties" />
+
 	<!-- Enables the Spring MVC @Controller programming model -->
-	<annotation-driven />
+	<annotation-driven>
+		<message-converters>
+			<!-- 문자열 응답 기본 인코딩이 ISO-8859-1 이라 한글이 깨지므로 UTF-8 로 -->
+			<beans:bean class="org.springframework.http.converter.StringHttpMessageConverter">
+				<beans:constructor-arg value="UTF-8" />
+			</beans:bean>
+		</message-converters>
+	</annotation-driven>
 
-	<!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory -->
 	<resources mapping="/resources/**" location="/resources/" />
-	<resources location="/resources/js/" 		mapping="/js/**" />
-	<resources location="/resources/images/" 		mapping="/images/**" />
-	<resources location="/resources/upload/" 			mapping="/upload/**" />
-	<resources location="/resources/css/" 			mapping="/css/**" />
-	<resources location="/resources/vendor/" 			mapping="/vendor/**" />
+	<resources location="/resources/js/" mapping="/js/**" />
+	<resources location="/resources/images/" mapping="/images/**" />
+	<resources location="/resources/css/" mapping="/css/**" />
+	<resources location="/resources/vendor/" mapping="/vendor/**" />
+	<!-- 업로드 파일은 웹앱 밖 폴더(app.properties 의 upload.path)에서 제공 -->
+	<resources location="file:${upload.path}/" mapping="/upload/**" />
 
-	<!-- Resolves views selected for rendering by @Controllers to .jsp resources in the /WEB-INF/views directory -->
+	<!-- 로그인이 필요한 화면 -->
+	<interceptors>
+		<interceptor>
+			<mapping path="/aucts/productEnrollment" />
+			<mapping path="/aucts/auctionItem" />
+			<mapping path="/aucts/modifyProduct" />
+			<mapping path="/aucts/productModify" />
+			<mapping path="/aucts/deleteProduct" />
+			<beans:bean class="com.myauct.web.global.LoginCheckInterceptor" />
+		</interceptor>
+	</interceptors>
+
 	<beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<beans:property name="prefix" value="/WEB-INF/views/" />
 		<beans:property name="suffix" value=".jsp" />
 		<beans:property name="order" value="1" />
 	</beans:bean>
-	
-	<beans:bean id="multipartResolver" class="org.springframework.web.multipart.support.StandardServletMultipartResolver"></beans:bean>	
-	
-	<context:component-scan base-package="com.myauct.web" />
-	
-	
-	
+
+	<beans:bean id="multipartResolver" class="org.springframework.web.multipart.support.StandardServletMultipartResolver" />
+
+	<!-- 컨트롤러만 스캔 (서비스는 root-context 에서 생성 → 서비스가 두 번 만들어지는 문제 방지) -->
+	<context:component-scan base-package="com.myauct.web" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+		<context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice" />
+	</context:component-scan>
+
 </beans:beans>

@@ -21,46 +21,36 @@ pw.addEventListener("keyup", () => {
 
 btn_sm.addEventListener("click", (e) => {
   e.preventDefault();
-  fetch("http://localhost:8989/web/rest/loginChk", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    "user_id" : ""+id.value,
-    "password" : ""+pw.value,
-  }),
-}).then((response) => response.text()).then(funcData => {
-  console.log(funcData)
-  if(funcData === "로그인 성공"){
-    var form = document.createElement('form');
-   	form.style.display= 'none';
-	var objs;
-	objs = document.createElement('input'); 
-	objs.setAttribute('type', 'text'); 
-	objs.setAttribute('name', 'user_id'); 
-	objs.setAttribute('value', id.value); 
-	form.appendChild(objs);	
-	form.setAttribute('method', 'post'); 
-	form.setAttribute('action', "/web/aucts/loginUser"); 
-	document.body.appendChild(form);
-	form.submit();
-  }
-})
+  // 서버가 비밀번호 확인 + 세션 저장까지 처리하므로 성공하면 이동만 하면 된다
+  fetch("/web/rest/loginChk", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: id.value, password: pw.value }),
+  }).then(async (response) => {
+    const msg = await response.text();
+    if (response.ok) {
+      // "아이디 기억하기": 체크했으면 아이디만 30일간 쿠키에 저장 (예전: 읽기만 하고 저장은 안 했음)
+      if (id_ck.checked) document.cookie = "id=" + encodeURIComponent(id.value) + "; max-age=" + 60 * 60 * 24 * 30 + "; path=/web";
+      else document.cookie = "id=; max-age=0; path=/web";
+      location.href = "/web/aucts/index";
+    } else {
+      alert(msg);
+    }
+  });
 });
 
 
 
 function popupId(){
-  const url = "http://localhost:8989/web/users/idFind"
+  const url = "/web/users/idFind"
   const name = "idFind"
-  const option = "width = 580, height = 300, top = 300, left = 450, location = no"
+  const option = "width=520,height=640,top=100,left=450,location=no"
   window.open(url, name, option)
 }
 function popupPw(){
-  const url = "http://localhost:8989/web/users/passwordFind"
+  const url = "/web/users/passwordFind"
   const name = "pwFind"
-  const option = `width = 580, height = 300, top =300, left = 450, location = no`
+  const option = "width=520,height=640,top=100,left=450,location=no"
   window.open(url, name, option)
 }
 
@@ -84,7 +74,7 @@ function popupPw(){
 			var end = cookieData.indexOf(';', start); // 못찾으면 -1 반환
 			if (end == -1) // 쿠키 값의 마지막 위치 인덱스 번호 설정 
 				end = cookieData.length;
-			cookieValue = cookieData.substring(start, end); // value 문자열 읽기
+			cookieValue = decodeURIComponent(cookieData.substring(start, end)); // value 문자열 읽기
 		}
 		return (cookieValue);
 	}

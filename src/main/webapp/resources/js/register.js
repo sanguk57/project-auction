@@ -5,9 +5,7 @@ const pw_rs = document.querySelector(".pw_rs");
 const btn_sm = document.querySelector(".btn_sm");
 const btn_pwck = document.querySelector(".btn_pwck");
 const tel_num = document.querySelector(".tel_num");
-const btn_phCk = document.querySelector(".btn_phCk");
 const email = document.querySelector(".email");
-const ok_num = document.querySelector(".ok_num");
 const name_input = document.querySelector(".name");
 const btn_addr = document.querySelector(".btn_addr")
 
@@ -131,7 +129,7 @@ btn_sm.addEventListener("click", (e) => {
   if (
     inId.classList.contains("is-valid") &&
     pw.classList.contains("is-valid") &&
-    ok_num.classList.contains("is-valid") &&
+    tel_num.classList.contains("is-valid") &&
     name_input.classList.contains("is-valid")
   ) {} else {
     e.preventDefault();
@@ -201,26 +199,17 @@ tel_num.addEventListener("keyup", () => {
     !(pw.value === pw_rs.value) ||
     pw_rs.value === ""
   ) {
-    btn_phCk.disabled = true;
+    btn_sm.disabled = true;
     tel_num.className = "form-control tel_num";
-    // tel_num.classList.remove("is-invalid", "is-valid")
-  } else btn_phCk.disabled = false;
-});
-
-var ok_code;
-btn_phCk.addEventListener("click", () => {
-  tel_num.className = "form-control tel_num is-valid";
-  ok_code = Math.round(Math.random() * (99999 - 10000 + 1)) + 10000;
-  setTimeout(() => {
-    ok_num.value = ok_code;
-    ok_num.className = "form-control ok_num is-valid";
+  } else {
+    // 예전: "본인인증" 버튼이 브라우저에서 임의의 숫자를 만들어 자동으로 채워 넣기만 했음(실제 인증 없음) → 제거
+    tel_num.className = "form-control tel_num is-valid";
     btn_sm.disabled = false;
-  }, 2000);
+  }
 });
 
 if ((pw.value === "" || inId.value === "") || (tel_num === "" || inId.value === "")) {
   btn_sm.disabled = true;
-  btn_phCk.disabled = true;
   pw_rs.disabled = true;
   btn_idck.disabled =  true;
 }

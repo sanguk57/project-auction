@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+    <%@ taglib uri="jakarta.tags.core" prefix="c" %>
         <c:set var="path" value="${pageContext.request.contextPath}" />
         <!DOCTYPE html>
         <html lang="en">
@@ -8,30 +8,27 @@
             <meta charset="UTF-8">
             <meta http-equiv="X-UA-Compatible" content="IE=edge">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Document</title>
+            <title>아이디 찾기 - MyAuct</title>
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
                 integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
                 crossorigin="anonymous">
-            <style>
-                .box {
-                    height: 100px;
-                    border: 1px solid black;
-                }
-                main{
-                    margin-top: 100px;
-                }
-            </style>
-        </head>
+        <%@ include file="/WEB-INF/views/include/authHead.jsp"%>
+</head>
 
-        <body class="text-center">
-            <div class="container test">
-                <main class="form-signin w-25 m-auto ">
-                    <h1>가입된 아이디 입니다.</h1>
-                    <div class="form-floating mt-3">
-                        ${param.user_id}
+        <body class="ma-auth">
+            <div class="ma-auth-wrap">
+                <a class="ma-auth-logo" href="/web/aucts/index"><i class="bi bi-hammer"></i>MyAuct</a>
+                <p class="ma-auth-sub">입력하신 정보로 가입된 아이디입니다.</p>
+                <main class="ma-auth-card text-center">
+                    <div class="ma-price-box mb-4">
+                        <div class="label">아이디</div>
+                        <div class="now" style="font-size: 28px"><c:out value="${user_id}" /></div>
                     </div>
+                    <a class="btn btn-lg btn-primary w-100" href="/web/users/login"
+                        onclick="if (window.opener) { window.opener.location.href = this.href; window.close(); return false; }">로그인하기</a>
                 </main>
             </div>
+
             <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
                 integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
                 crossorigin="anonymous"></script>

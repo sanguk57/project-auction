@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
-	version="3.1">
+<!-- Jakarta EE 11 / Servlet 6.1 (Tomcat 11) -->
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_1.xsd"
+	version="6.1">
 
 	<!-- The definition of the Root Spring Container shared by all Servlets 
 		and Filters -->
@@ -29,15 +30,16 @@
 		<load-on-startup>1</load-on-startup>
 
 		<multipart-config>
-			<location>/Users/Kungas_57/Desktop/study_java/Spring_STS/myAuct/src/main/webapp/resources/upload</location>		
-			<max-file-size>20971520</max-file-size>					<!-- 1MB * 20 -->
-			<max-request-size>41943040</max-request-size>			<!-- 40MB -->
-			<file-size-threshold>20971520</file-size-threshold>		<!-- 20MB -->
+			<!-- location 생략 → 톰캣 임시폴더 사용 (특정 PC 경로 하드코딩 제거) -->
+			<max-file-size>20971520</max-file-size>					<!-- 파일 하나 최대 20MB -->
+			<max-request-size>41943040</max-request-size>			<!-- 요청 전체 최대 40MB -->
+			<file-size-threshold>1048576</file-size-threshold>		<!-- 1MB 넘으면 임시파일 사용 -->
 		</multipart-config>
 		
 	</servlet>
 	<session-config>
-		<session-timeout>0</session-timeout>
+		<!-- 0 은 '만료 없음'이라 로그인 세션이 영원히 남음 → 30분 -->
+		<session-timeout>30</session-timeout>
 	</session-config>
 	<servlet-mapping>
 		<servlet-name>appServlet</servlet-name>

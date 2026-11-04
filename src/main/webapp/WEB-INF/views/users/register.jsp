@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="jakarta.tags.core" prefix="c"%>
 <c:set var="path" value="${pageContext.request.contextPath}" />
 <!DOCTYPE html>
 <html lang="en">
@@ -9,7 +9,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Document</title>
+<title>회원가입 - MyAuct</title>
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
 	rel="stylesheet"
@@ -17,13 +17,19 @@
 	crossorigin="anonymous">
 <style>
 </style>
+<%@ include file="/WEB-INF/views/include/authHead.jsp"%>
 </head>
 
-<body>
-	<div
-		class="container d-flex justify-content-center align-items-center mt-5">
-		<form class="row g-3 text-start w-50 h-50 mx-auto"
+<body class="ma-auth wide">
+	<div class="ma-auth-wrap">
+		<a class="ma-auth-logo" href="/web/aucts/index"><i class="bi bi-hammer"></i>MyAuct</a>
+		<p class="ma-auth-sub">회원 정보를 입력해주세요. <span style="color: var(--ma-danger)">*</span> 표시는 필수 항목입니다.</p>
+		<div class="ma-auth-card">
+		<form class="row g-3 text-start"
 			action="${path}/users/userCreate" method="post" name="form" id="form">
+			<c:if test="${not empty errorMsg}">
+				<div class="alert alert-danger" role="alert"><c:out value="${errorMsg}" /></div>
+			</c:if>
 			<div class="col-md-9">
 				<label for="inputId" class="form-label ">아이디*</label> <input
 					type="text" name="user_id" class="form-control id" id="inputText"
@@ -39,9 +45,8 @@
 
 
 			<div class="col-md-12">
-				<label for="inputPassword" class="form-label">비밀번호* 확인</label> <input
-					class="form-check-input me-3 btn_pwck" type="checkbox"
-					id="flexRadioDefault1"> <input
+				<label for="inputPassword" class="form-label d-flex justify-content-between">비밀번호*
+					<span class="fw-normal small text-muted"><input class="form-check-input me-1 btn_pwck" type="checkbox" id="flexRadioDefault1"> 비밀번호 보기</span></label> <input
 					type="password" class="form-control pw" id="inputPassword" name="password"
 					placeholder="영문(대, 소), 특수문자, 숫자 1개 이상포함 8자리이상">
 				<p class="invalid-feedback pw_ck m-0"></p>
@@ -85,24 +90,17 @@
 					name="email">
 				<p class="invalid-feedback email_ck m-0"></p>
 			</div>
-			<div class="col-md-9">
+			<div class="col-12">
 				<label for="inputId" class="form-label">전화번호*</label> <input
 					type="tel" class="form-control tel_num" name="phone" id="inputTel"
 					placeholder="핸드폰 번호">
 			</div>
-			<div class="col-md-3 d-flex justify-content-center align-items-end">
-				<button type="button" class="btn btn-lg btn-primary w-100  btn_phCk">본인인증</button>
-			</div>
-
-			<div class="col-md-12">
-				<input type="text" class="form-control ok_num" id="inputNum"
-					placeholder="인증번호">
-			</div>
 			<div class="col-12">
 				<button type="submit"
-					class="btn btn-lg btn-primary w-100 btn_sm p-0">가입하기</button>
+					class="btn btn-lg btn-primary w-100 btn_sm mt-2">가입하기</button>
 			</div>
 		</form>
+		</div>
 	</div>
 	<script
 		src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"

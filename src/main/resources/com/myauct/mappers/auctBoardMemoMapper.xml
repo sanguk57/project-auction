@@ -2,19 +2,17 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper
-	namespace="com.myauct.web.domain.auctboard.dao.AuctBoardMemoDAO">
-	
+<mapper namespace="com.myauct.web.domain.auctboard.dao.AuctBoardMemoDAO">
+
 	<select id="getMemoList" resultType="AuctBoardMemoDTO">
-		select * from Auct_Board_Memo where qnum = #{qnum} 
+		select M.*, U.name
+		from Auct_Board_Memo M
+		left join User_List U on M.unum = U.unum
+		where M.qnum = #{qnum}
+		order by M.mnum
 	</select>
-	
-	<insert id="CreateMemo">
+
+	<insert id="createMemo">
 		insert into Auct_Board_Memo (qnum, memo, unum) values (#{qnum}, #{memo}, #{unum})
 	</insert>
-	
-	<select id="MemoCnt" resultType="_int">
-		select count(*) from Auct_Board_Memo where qnum = #{qnum}
-	</select>
-	
-	</mapper>
+</mapper>

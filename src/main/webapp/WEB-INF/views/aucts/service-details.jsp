@@ -1,243 +1,204 @@
-<%@page import="com.myauct.web.domain.user.dto.UserDTO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ include file="/WEB-INF/views/include/head.jsp"%>
 <!DOCTYPE html>
-<style>
-.swiper-slide {
-	text-align: center;
-	font-size: 18px;
-	background: #fff;
-	/* Center slide text vertically */
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: -webkit-flex;
-	display: flex;
-	-webkit-box-pack: center;
-	-ms-flex-pack: center;
-	-webkit-justify-content: center;
-	justify-content: center;
-	-webkit-box-align: center;
-	-ms-flex-align: center;
-	-webkit-align-items: center;
-	align-items: center;
-}
-</style>
-<!-- ======= Header ======= -->
+<body>
 <%@ include file="/WEB-INF/views/include/header.jsp"%>
-<!-- End Header -->
+<c:set var="p" value="${auctMasterDTO}" />
+<c:set var="status" value="${p.auct_status}" />
+<c:set var="isOwner" value="${user != null && user.unum == p.unum}" />
 
 <main id="main">
+	<section class="ma-detail" style="padding-top: 110px">
+		<div class="container">
 
-	<!-- ======= Breadcrumbs ======= -->
-	<div class="breadcrumbs">
-		<div class="page-header d-flex align-items-center"
-			style="background-image: url('/web/images/page-header.jpg');">
-			<div class="container position-relative">
-				<div class="row d-flex justify-content-center">
-					<div class="col-lg-6 text-center">
-						<h2>${auctMasterDTO.prod_title}</h2>
-						<p>${auctMasterDTO.contents}</p>
-					</div>
-				</div>
-			</div>
-		</div>
-		<nav>
-			<div class="container">
-				<ol>
-					<li><a href="index">Home</a></li>
-					<li>Service Details</li>
+			<nav aria-label="breadcrumb" class="mb-3">
+				<ol class="breadcrumb small mb-0">
+					<li class="breadcrumb-item"><a href="/web/aucts/index">홈</a></li>
+					<li class="breadcrumb-item"><a href="/web/aucts/about?value=${fn:escapeXml(category)}"><c:out value="${category}" /></a></li>
+					<li class="breadcrumb-item active" aria-current="page"><c:out value="${p.prod_name}" /></li>
 				</ol>
-			</div>
-		</nav>
-	</div>
-	<!-- End Breadcrumbs -->
+			</nav>
 
-	<!-- ======= Service Details Section ======= -->
-	<section id="service-details" class="service-details">
-		<div class="container" data-aos="fade-up">
-
-			<div class="row gy-4">
-				<h3 class="text-center">${auctMasterDTO.anum}:${category}:
-					${auctMasterDTO.prod_name}</h3>
-				<div class="col-lg-5">
-					<div class="card-img card${product.anum} swiper mySwiper">
-						<div class="swiper-wrapper">
-							<c:forEach var="images" items="${uploadFileList}">
-								<div class="swiper-slide">
-									<img src="/web/upload/${images}" alt=""
-										class="img-fluid services-img">
-								</div>
-							</c:forEach>
-						</div>
-						<div class="swiper-button-next"></div>
-						<div class="swiper-button-prev"></div>
-						<div class="swiper-pagination"></div>
-					</div>
-				</div>
-				<div class="col-lg-7">
-					<ul>
-						<li><i class="bi bi-check-circle"></i><span>상품 : <c:if
-									test="${auctMasterDTO.prod_type == N}">
-								미개봉
-								</c:if> 중고
-						</span></li>
-						<li><i class="bi bi-check-circle"></i><span>AS : <c:if
-									test="${auctMasterDTO.as_type == N}">
-								불가능 
-								</c:if> 가능
-						</span></li>
-						<li><i class="bi bi-check-circle"></i><span>즉시구매 : <c:if
-									test="${auctMasterDTO.limit_type == N}">
-									불가능 
-									</c:if> 가능
-						</span></li>
-						<li><i class="bi bi-check-circle"></i><span>배송방법 :<c:if
-									test="${auctMasterDTO.trans_type == N}">
-									직거래 
-									</c:if> 택배
-						</span></li>
-					</ul>
-
-					<div class="row gy-4">
-						<div class="col-lg-6">
-							<h4>입찰자 수</h4>
-							<p>${auctMasterDTO.join_cnt}명</p>
-						</div>
-						<div class="col-lg-6">
-							<h4>현재 경매가</h4>
-							<fmt:formatNumber value="${auctMasterDTO.start_amt}"
-								pattern="#,###원" />
-						</div>
-						<div class="col-lg-6">
-							<h4>판매지역</h4>
-							<p>${auctMasterDTO.sales_addr}</p>
-						</div>
-						<div class="col-lg-6">
-							<h4>시중에 판매중인 가격</h4>
-							<p>
-								<fmt:formatNumber value="${auctMasterDTO.curr_amt}"
-									pattern="#,###원" />
-							</p>
-						</div>
-					</div>
-					<div class="services-list">
-						<div>
-							<span id="countDown"></span>
-							<c:if test="${user.unum == auctMasterDTO.unum}">
-								<a class="btn btn-outline-primary"
-									href="modifyProduct?anum=${auctMasterDTO.anum}" id="modifyBtn">상품
-									수정</a>
-								<a class="btn btn-outline-primary"
-									href="deleteProduct?anum=${anucMasterDTO.anum}" id="deleteBtn">삭제</a>
-							</c:if>
-						</div>
+			<div class="row g-4">
+				<!-- ===== 사진 ===== -->
+				<div class="col-lg-6">
+					<div class="ma-card ma-gallery">
 						<c:choose>
-							<c:when test="${user == null}">
-								<div>
-									<p class="alert alert-primary " role="alert">
-										즉시구매 가격 :
-										<fmt:formatNumber value="${auctMasterDTO.limit_amt}"
-											pattern="#,###원" />
-										<a class="btn btn-outline-primary" href="/web/users/login">즉시구매</a>
+							<c:when test="${not empty uploadFileList}">
+								<div class="swiper detailSwiper">
+									<div class="swiper-wrapper">
+										<c:forEach var="img" items="${uploadFileList}">
+											<div class="swiper-slide"><img src="/web/upload/${fn:escapeXml(img)}" alt="<c:out value='${p.prod_name}' /> 사진"></div>
+										</c:forEach>
+									</div>
+									<c:if test="${fn:length(uploadFileList) > 1}">
+										<div class="swiper-button-next"></div>
+										<div class="swiper-button-prev"></div>
+										<div class="swiper-pagination"></div>
+									</c:if>
 								</div>
 							</c:when>
 							<c:otherwise>
-								<div>
-									<select class="form-select form-select-sm"
-										aria-label=".form-select-sm example" id="amount" name="amount">
-										<option selected="selected" disabled>입찰 수량</option>
-									</select>
-								</div>
-								<c:if
-									test="${auctMasterDTO.limit_amt > (auctMasterDTO.start_amt+auctMasterDTO.join_amt)}">
-									<div class="input-group mb-3">
-										<form action="">
-											<p class="input-group">
-												<input type="text" class="form-control reStart_amt w-75"
-													onchange="inputNumberFormat(this)" placeholder="입찰가 입력"
-													aria-label="Recipient's username"
-													aria-describedby="button-addon2">
-												<button class="btn btn-outline-primary btn-sm w-25"
-													type="button" id="button-addon1">직접 입찰</button>
-											</p>
-											<input type="hidden" id="start_amt" />
-										</form>
-									</div>
-
-									<div class="input-group mb-3" id="dp">
-										<form>
-											<p class="input-group">
-												<input type="text" class="form-control w-75" disabled
-													value="<fmt:formatNumber value="${auctMasterDTO.start_amt+auctMasterDTO.join_amt}"  pattern="#,###원"/>"
-													aria-label="Recipient's username" id="product_amt"
-													aria-describedby="button-addon2" name="start_amt">
-												<button class="btn btn-outline-primary btn-sm w-25"
-													type="button" id="button-addon2">최소 가격 입찰</button>
-											</p>
-										</form>
-									</div>
-								</c:if>
-								<div>
-									<p class="alert alert-primary " role="alert" id="reStart_amt">
-										입찰시 가격 :
-										<fmt:formatNumber
-											value="${auctMasterDTO.start_amt+auctMasterDTO.join_amt}"
-											pattern="#,###원" />
-									</p>
-								</div>
-								<c:if test="${auctMasterDTO.limit_type != N}">
-									<div>
-										<p class="alert alert-primary " role="alert">
-											즉시구매 가격 :
-											<fmt:formatNumber value="${auctMasterDTO.limit_amt}"
-												pattern="#,###원" />
-											<button class="btn btn-outline-primary" type="button"
-												id="limit_btn">즉시구매</button>
-										</p>
-									</div>
-								</c:if>
-								
-								<c:if test="${user != null}">
-									<div>
-										<form>
-											<input type="hidden" value="${auctMasterDTO.anum}">
-											<p class="input-group" id="board-group">
-												<input id="subject" type="text" aria-label="First-title"
-													class="form-control" style="width: 15%"> <input
-													type="text" aria-label="contents" class="form-control"
-													style="width: 50%" id="contents">
-												<button class="btn btn-outline-primary btn-sm"
-													style="width: 15%" type="button" id="board-cancel">취소</button>
-												<button class="btn btn-outline-primary btn-sm"
-													style="width: 20%" type="button" id="boardCreate">댓글
-													추가...</button>
-											</p>
-										</form>
-									</div>
-								</c:if>
+								<div class="auct-thumb-empty"><i class="bi bi-image"></i>등록된 사진이 없습니다</div>
 							</c:otherwise>
 						</c:choose>
-						<c:forEach var="board" items="${boardList}" varStatus="status">
-							<div class="board-list look">
-								<p>${nameList[status.index]} : ${board.wdate}</p>
-								<p class="contents">${board.subject} : ${board.contents}</p>
-								<input type="hidden" class="btnQnum" value="${board.qnum}">
-								<button class="btn btn-outline-primary btn-sm board-memo">답글</button>
-								<a class="memo_btn" href="#"><c:if test="${memoCntList[status.index] != 0 }">답글 ${memoCntList[status.index]}개</c:if> </a>
-									<div id="memoList" class="memoList p-0 ps-3"></div>
-									
-									<form class=" memo mt-2">
-									<p class="input-group" id="board-group">
-									<input type="hidden" class="memo-qnum" value="${board.qnum}">
-										<input type="text" aria-label="memo" class="form-control memo-text"
-											style="width: 70%">
-											<button class="btn btn-outline-primary btn-sm memo-cancel"
-													style="width: 15%" type="button">취소</button>
-										<button class="btn btn-outline-primary btn-sm memoCreate"
-											style="width: 15%" type="button">
-											답글</button>
-									</p>
+					</div>
+				</div>
+
+				<!-- ===== 가격 · 입찰 ===== -->
+				<div class="col-lg-6">
+					<div class="ma-card ma-info">
+						<span class="cat"><c:out value="${category}" /></span>
+						<%-- 제목/설명은 c:out 으로 출력 (스크립트 삽입 방지) --%>
+						<h1><c:out value="${p.prod_title}" /></h1>
+
+						<div class="ma-chips">
+							<span class="ma-chip"><i class="bi bi-box"></i>${p.prod_type == 'N' ? '새상품' : '중고'}</span>
+							<span class="ma-chip"><i class="bi bi-tools"></i>AS ${p.as_type == 'N' ? '불가' : '가능'}</span>
+							<span class="ma-chip"><i class="bi bi-truck"></i>${p.trans_type == 'N' ? '직거래' : '택배'}</span>
+							<c:if test="${not empty p.sales_addr}">
+								<span class="ma-chip"><i class="bi bi-geo-alt"></i><c:out value="${p.sales_addr}" /></span>
+							</c:if>
+						</div>
+
+						<div id="countDown" class="ma-countdown ${status == 'READY' ? 'ready' : (status == 'ENDED' ? 'ended' : '')}">
+							<i class="bi ${status == 'ENDED' ? 'bi-flag' : 'bi-clock-history'}"></i>
+							<span class="text"><c:out value="${p.time_label}" /></span>
+						</div>
+
+						<div class="ma-price-box">
+							<div class="label">현재가</div>
+							<div class="now"><fmt:formatNumber value="${p.start_amt}" pattern="#,###" />원</div>
+							<div class="sub">
+								<div>입찰<strong>${p.join_cnt}회</strong></div>
+								<div>입찰 단위<strong><fmt:formatNumber value="${p.join_amt}" pattern="#,##0" />원</strong></div>
+								<c:choose>
+									<c:when test="${p.limit_type == 'Y' && p.limit_amt > 0}">
+										<div>즉시구매가<strong><fmt:formatNumber value="${p.limit_amt}" pattern="#,###" />원</strong></div>
+									</c:when>
+									<c:otherwise>
+										<div>시중가<strong><fmt:formatNumber value="${p.curr_amt}" pattern="#,##0" />원</strong></div>
+									</c:otherwise>
+								</c:choose>
+							</div>
+						</div>
+
+						<c:choose>
+							<%-- 판매자 본인 --%>
+							<c:when test="${isOwner}">
+								<div class="ma-login-box">
+									<i class="bi bi-person-badge"></i> 내가 등록한 상품입니다.
+									<c:if test="${p.join_cnt > 0}"><br><small>입찰이 시작되어 수정 · 삭제할 수 없습니다.</small></c:if>
+								</div>
+								<c:if test="${p.join_cnt == 0}">
+									<div class="ma-owner">
+										<a class="btn btn-light-ma" href="/web/aucts/modifyProduct?anum=${p.anum}"><i class="bi bi-pencil"></i> 수정</a>
+										<form action="/web/aucts/deleteProduct" method="post" onsubmit="return confirm('상품을 삭제할까요?');">
+											<input type="hidden" name="anum" value="${p.anum}">
+											<button type="submit" class="btn btn-danger-ghost"><i class="bi bi-trash"></i> 삭제</button>
+										</form>
+									</div>
+								</c:if>
+							</c:when>
+							<%-- 비로그인 --%>
+							<c:when test="${user == null}">
+								<div class="ma-login-box">
+									입찰하려면 로그인이 필요합니다.<br>
+									<a class="btn btn-primary mt-3" href="/web/users/login">로그인하고 입찰하기</a>
+								</div>
+							</c:when>
+							<%-- 진행 중 --%>
+							<c:when test="${status == 'LIVE'}">
+								<form class="ma-bid" id="bidForm" onsubmit="return false">
+									<div class="row g-2">
+										<div class="${p.total_cnt > 1 ? 'col-8' : 'col-12'}">
+											<label class="form-label" for="bidPrice">입찰가</label>
+											<div class="input-group">
+												<input type="text" inputmode="numeric" class="form-control" id="bidPrice" autocomplete="off"
+													placeholder="<fmt:formatNumber value='${p.min_bid}' pattern='#,###' />">
+												<span class="input-group-text">원</span>
+											</div>
+										</div>
+										<c:if test="${p.total_cnt > 1}">
+											<div class="col-4">
+												<label class="form-label" for="amount">수량</label>
+												<select class="form-select" id="amount">
+													<c:forEach begin="1" end="${p.total_cnt}" var="n"><option value="${n}">${n}개</option></c:forEach>
+												</select>
+											</div>
+										</c:if>
+									</div>
+									<div class="hint" id="bidHint">최소 <b><fmt:formatNumber value="${p.min_bid}" pattern="#,###" />원</b>부터 입찰할 수 있습니다.</div>
+									<button type="button" class="btn btn-primary btn-bid" id="bidBtn"><i class="bi bi-hammer"></i> 입찰하기</button>
+									<button type="button" class="btn btn-outline-primary btn-quick" id="minBidBtn">
+										최소 금액 <fmt:formatNumber value="${p.min_bid}" pattern="#,###" />원으로 입찰
+									</button>
+								</form>
+							</c:when>
+							<c:when test="${status == 'READY'}">
+								<div class="ma-login-box">아직 경매가 시작되지 않았습니다.<br>시작 시간 이후에 입찰할 수 있습니다.</div>
+							</c:when>
+							<c:otherwise>
+								<div class="ma-login-box">마감된 경매입니다.</div>
+							</c:otherwise>
+						</c:choose>
+					</div>
+				</div>
+
+				<!-- ===== 상품 설명 ===== -->
+				<div class="col-12">
+					<div class="ma-card ma-desc mt-0">
+						<h3>상품 설명</h3>
+						<div class="body"><c:out value="${p.contents}" /></div>
+						<dl>
+							<dt>상품명</dt><dd><c:out value="${p.prod_name}" /></dd>
+							<dt>판매 수량</dt><dd>${p.total_cnt}개</dd>
+							<dt>경매 기간</dt><dd><c:out value="${fn:substring(p.auct_start, 0, 16)}" /> ~ <c:out value="${fn:substring(p.auct_end, 0, 16)}" /></dd>
+							<dt>시중 판매가</dt><dd><fmt:formatNumber value="${p.curr_amt}" pattern="#,##0" />원</dd>
+						</dl>
+					</div>
+				</div>
+
+				<!-- ===== 문의 ===== -->
+				<div class="col-12">
+					<div class="ma-card ma-qna mt-0">
+						<h3>상품 문의 <span class="text-muted fw-normal fs-6">${fn:length(boardList)}</span></h3>
+
+						<c:if test="${user != null}">
+							<form class="write" id="boardForm" onsubmit="return false">
+								<input id="subject" type="text" class="form-control" maxlength="100" placeholder="제목">
+								<textarea id="contents" class="form-control" rows="3" maxlength="1000" placeholder="판매자에게 궁금한 점을 남겨주세요."></textarea>
+								<div class="actions">
+									<button type="button" class="btn btn-light-ma btn-sm" id="board-cancel">취소</button>
+									<button type="button" class="btn btn-primary btn-sm" id="boardCreate" disabled>문의 등록</button>
+								</div>
+							</form>
+						</c:if>
+
+						<c:if test="${empty boardList}">
+							<div class="empty">아직 문의가 없습니다.</div>
+						</c:if>
+
+						<c:forEach var="board" items="${boardList}">
+							<div class="item" data-qnum="${board.qnum}">
+								<div class="who">
+									<span class="avatar"><c:out value="${fn:substring(board.name, 0, 1)}" /></span>
+									<b><c:out value="${board.name}" /></b>
+									<time><c:out value="${fn:substring(board.wdate, 0, 16)}" /></time>
+								</div>
+								<div class="subject"><c:out value="${board.subject}" /></div>
+								<p class="text"><c:out value="${board.contents}" /></p>
+								<div class="tools">
+									<button type="button" class="memo-toggle" ${board.memo_cnt == 0 ? 'hidden' : ''}><i class="bi bi-chat"></i> 답글 ${board.memo_cnt}개</button>
+									<c:if test="${user != null}">
+										<button type="button" class="memo-write"><i class="bi bi-reply"></i> 답글 쓰기</button>
+									</c:if>
+								</div>
+								<div class="memos"></div>
+								<form class="memo-form" onsubmit="return false">
+									<input type="text" class="form-control form-control-sm memo-text" maxlength="1000" placeholder="답글을 입력하세요">
+									<button type="button" class="btn btn-primary btn-sm memoCreate">등록</button>
 								</form>
 							</div>
 						</c:forEach>
@@ -246,332 +207,158 @@
 			</div>
 		</div>
 	</section>
-	<!-- End Service Details Section -->
-
 </main>
-<!-- End #main -->
 
-<!-- ======= Footer ======= -->
 <%@ include file="/WEB-INF/views/include/footer.jsp"%>
-<!-- End Footer -->
-<script type="text/javascript" defer="defer">
-	$(function(){
-		for(var i=1; i<=${auctMasterDTO.total_cnt}; i++){
-			$('#amount').append("<option value='"+i+"'  >"+i+"</option>")
-		}
-		$('.memo_btn').click(function(e){
-			e.preventDefault();
-			e.stopPropagation();
-			console.log($(e.currentTarget).siblings('.memoList').css("display") == 'none')
-			if($(e.currentTarget).siblings('.memoList').css("display") == 'none') {
-				$(e.currentTarget).siblings('.memoList').html(" ")
-				$(e.currentTarget).siblings('.memoList').css("display", "block");
-			}else{
-				$(e.currentTarget).siblings('.memoList').css("display", "none");
-			}
-			let qnum = $(e.currentTarget).siblings('.btnQnum').val()
-			console.log(qnum)
-			var memoList = {qnum:Number(qnum)}
-			 $.ajax({
-			        url: "/web/product-api/memoList",
-			        type: "POST",
-			        contentType : "application/json; charset=UTF-8",
-			        dataType : "json",
-			        data : JSON.stringify(memoList),
-			      	success: function(data, textStatus){
-			          for(var i in data){
-			        	  $(e.currentTarget).siblings('#memoList').append("<p>"+data[i].wdate +" : "+ data[i].memo+"</p>")
-			          }       
-			        },
-			        error: function(data, textStatus){
-			         console.log(data.responseText, textStatus)
-			         }
-			      });
-		})
-		$('.memoCreate').click(function(e){
-			e.stopPropagation();
-			let qnum = $(e.currentTarget).siblings('.memo-qnum').val()
-			let unum = ${user.unum == null ? '0' : user.unum}
-			let text = $(e.currentTarget).siblings('.memo-text').val()
-			
-			 var memo = {qnum:Number(qnum), memo:text, unum:unum}
-		  $.ajax({
-		        url: "/web/product-api/create_memo",
-		        type: "POST",
-		        contentType : "application/json; charset=UTF-8",
-		        dataType : "text",
-		        data : JSON.stringify(memo),
-		      	success: function(data, textStatus){
-		          /* window.location.reload()		 */         
-		        },
-		        error: function(data, textStatus){
-		         console.log(data.responseText, textStatus)
-		         }
-		      });
-		})
-		
-		$('#boardCreate').click(function(e){
-			var board = {anum:${auctMasterDTO.anum}, unum:${user.unum == null ? '0' : user.unum}, subject:$('#subject').val(), contents:$('#contents').val()}
-		 $.ajax({
-		        url: "/web/product-api/create_board",
-		        type: "POST",
-		        contentType : "application/json; charset=UTF-8",
-		        dataType : "text",
-		        data : JSON.stringify(board),
-		      	success: function(data, textStatus){
-		          window.location.reload()		         
-		        },
-		        error: function(data, textStatus){
-		         console.log(data.responseText, textStatus)
-		         }
-		      });
-			})
-			
-		$('#button-addon1').click(function(e){
-			e.preventDefault();
-			var product_amt = {start_amt:$('#start_amt').val(), anum:${auctMasterDTO.anum}, unum:${user.unum ==null ? "로그인" : user.unum}, volume:$('#start_amt').val(), amount:$('#amount').val()}
-		 $.ajax({
-		        url: "/web/product-api/product_auction",
-		        type: "PUT",
-		        contentType : "application/json; charset=UTF-8",
-		        dataType : "text",
-		        data : JSON.stringify(product_amt),
-		      	success: function(data, textStatus){
-		      		 window.location.reload()		     
-		        },
-		        error: function(data, textStatus){
-		         console.log(data.responseText, textStatus)
-		         }
-		      });
-			})
-			
-		$('#button-addon2').click(function(e){
-			e.preventDefault();
-			var product_amt = {start_amt:${auctMasterDTO.start_amt+auctMasterDTO.join_amt}, anum:${auctMasterDTO.anum}, unum:${user.unum ==null ? "로그인" : user.unum}, volume:${auctMasterDTO.start_amt+auctMasterDTO.join_amt}, amount:$('#amount').val()}
-		 $.ajax({
-		        url: "/web/product-api/product_auction",
-		        type: "PUT",
-		        contentType : "application/json; charset=UTF-8",
-		        dataType : "text",
-		        data : JSON.stringify(product_amt),
-		      	success: function(data, textStatus){
-		          window.location.reload()
-		        },
-		        error: function(data, textStatus){
-		         console.log(data.responseText, textStatus)
-		         }
-		      });
-			})
-			/* 즉시구매 버튼 눌렸을때 즉시구매 신청자 만들고, 더이상 입찰 못하게끔 ui를 만들어야 함  */
-/* 		$('#limit_btn').click(function(e)){
-			e.preventDefault();
-			var limit_amt = 
-		}	 */
-		
-	 	$('.memo').css("display", "none");
-		$('.contents').css("display", "none");
-		$('.memoList').css("display", "none");
-		
-		$('#board-cancel').click(function (){
-			$('#contents').val('')
-			$('#subject').val('')
-		})
-		
-			$('.look').click(function(e){
-				if($(e.currentTarget).children('.contents').css("display") == 'none') {
-				$(e.currentTarget).children('.contents').css("display", "block");
-				}else{
-				$(e.currentTarget).children('.contents').css("display", "none");
-				}
-			})
-		  });
-	
-		$('.board-memo').click(function(e){
-			e.stopPropagation();
-			
-			console.log("click")
-			if($(e.currentTarget).siblings('.memo').css("display") == 'none') {
-				$(e.currentTarget).siblings('.memo').css("display", "block");
-				/* 인풋 요소에 포커스 주는거 생각 */
-				$(e.currentTarget).siblings('.memo').siblings('.memo-text').focus()
-			}else{
-				$(e.currentTarget).siblings('.memo').css("display", "none");
-			}
-			
-		})
-		
-		$('.memo-cancel').click(function(e){
-			e.stopPropagation();
-			console.log("click")
-			$(e.currentTarget).closest('.memo').css("display", "none");
-		})
-		
-	const countDownTimer1 = function (id, date) {
-		var _vDate = new Date(date); // 전달 받은 일자
-		var _second = 1000;
-		var _minute = _second * 60;
-		var _hour = _minute * 60;
-		var _day = _hour * 24;
-		var timer;
+<script>
+(function () {
+	const ANUM = ${p.anum};
+	const MIN_BID = ${p.min_bid};
+	const START = "${fn:replace(p.auct_start, ' ', 'T')}";
+	const END = "${fn:replace(p.auct_end, ' ', 'T')}";
+	const JSON_HEADERS = { "Content-Type": "application/json; charset=UTF-8" };
 
-		function showRemaining1() {
-			var now = new Date();
-			var distDt = _vDate - now;
-			
-			if (distDt < 0) {
-				clearInterval(timer);
-				document.getElementById(id).textContent = '경매가 시작 됩니다. ';
-				return;
-				
-			}
-				var days = Math.floor(distDt / _day);
-				var hours = Math.floor((distDt % _day) / _hour);
-				var minutes = Math.floor((distDt % _hour) / _minute);
-				var seconds = Math.floor((distDt % _minute) / _second);
-
-				//document.getElementById(id).textContent = date.toLocaleString() + "까지 : ";
-				document.getElementById(id).textContent = '경매시작 까지 남은 시간 : ';
-				document.getElementById(id).textContent += days + '일 ';
-				document.getElementById(id).textContent += hours + '시간 ';
-				document.getElementById(id).textContent += minutes + '분 ';
-				document.getElementById(id).textContent += seconds + '초';
-			}
-	timer = setInterval(showRemaining1, 1000)
-		}
-	
-	
-	const countDownTimer2 = function (id, date) {
-		var _eDate = new Date(date); // 전달 받은 일자
-		var _second = 1000;
-		var _minute = _second * 60;
-		var _hour = _minute * 60;
-		var _day = _hour * 24;
-		var timer;
-		
-		function showRemaining2() {
-			var now = new Date();
-			var distEt = _eDate - now;
-			
-			if (distEt < 0) {
-				clearInterval(timer);
-				document.getElementById(id).textContent = '경매가 마감 되었습니다.';
-				document.getElementById(service-details).disabled = true;
-				return;
-			}
-			var days = Math.floor(distEt / _day);
-			var hours = Math.floor((distEt % _day) / _hour);
-			var minutes = Math.floor((distEt % _hour) / _minute);
-			var seconds = Math.floor((distEt % _minute) / _second);
-
-			//document.getElementById(id).textContent = date.toLocaleString() + "까지 : ";
-			document.getElementById(id).textContent = '경매마감 까지 남은 시간 : ';
-			document.getElementById(id).textContent += days + '일 ';
-			document.getElementById(id).textContent += hours + '시간 ';
-			document.getElementById(id).textContent += minutes + '분 ';
-			document.getElementById(id).textContent += seconds + '초';
-		}
-		timer = setInterval(showRemaining2, 1000)
+	function post(url, method, body) {
+		return fetch(url, { method: method, headers: JSON_HEADERS, body: JSON.stringify(body) })
+			.then(async (res) => {
+				const text = await res.text();
+				if (!res.ok) throw new Error(text || "요청에 실패했습니다.");
+				return text;
+			});
 	}
-	
-	countDownTimer1('countDown', "${auctMasterDTO.auct_start}")
-	countDownTimer2('countDown', "${auctMasterDTO.auct_end}");
-	
-	document.getElementById('amount').addEventListener('change', ()=>{
-	console.log()
-	if(document.getElementById('amount').value != ''){
-		document.getElementById('button-addon1').disabled = false
-		document.getElementById('button-addon2').disabled = false
-		document.getElementById('limit_btn').disabled = false
-	} 
-	
-	});
-	
-	if(document.getElementById('amount').value == '입찰 수량'){
-		document.getElementById('button-addon1').disabled = true
-		document.getElementById('button-addon2').disabled = true
-		document.getElementById('limit_btn').disabled = true
-	} 
-	
-	if(document.getElementById('subject').value == '' || document.getElementById('contents').value == ''){
-		document.getElementById('boardCreate').disabled = true
-	}
-	
-	document.getElementById('subject').addEventListener('keyup', ()=>{
-		if(document.getElementById('subject').value == '' || document.getElementById('contents').value == ''){
-			document.getElementById('boardCreate').disabled = true
-		}else{
-			document.getElementById('boardCreate').disabled = false
-		}
-	})
-	
-	document.getElementById('contents').addEventListener('keyup', ()=>{
-		if(document.getElementById('subject').value == '' || document.getElementById('contents').value == ''){
-			document.getElementById('boardCreate').disabled = true
-		}else{
-			document.getElementById('boardCreate').disabled = false
-		}
-	})
-	
-	function inputNumberFormat(obj) {
-		if (obj.value != '') {
-			if(obj.value > ${auctMasterDTO.start_amt+auctMasterDTO.join_amt} && obj.value < ${auctMasterDTO.limit_amt})
-				{
-			document.querySelector('#start_amt').value = obj.value
-			obj.value = comma(uncomma(obj.value));
-			document.querySelector('#reStart_amt').innerText = "입찰시 가격 : "+ obj.value
-			document.querySelector('#dp').style.display = "none";
-				}
-			else{				
-			obj.value = ''
-			document.querySelector('#reStart_amt').innerText = "입찰시 가격 : "+ document.querySelector('#product_amt').value
-			document.querySelector('#dp').style.display = "block";
-			}
-		}
-	}
-	
-	document.querySelector('.reStart_amt').addEventListener('keyup', ()=>{
-			if(	document.querySelector('.reStart_amt').value == ''){
-				document.querySelector('#dp').style.display = "block";
-			} 
-		})
-	
-	function comma(str) {
-		str = String(str);
-		str = str.replace(/(\d)(?=(?:\d{3})+(?!\d))/g, "$1,");
-		if (str != '') {
-			str += "원"
-		}
-		return str
-	}
+	const won = (n) => Number(n).toLocaleString("ko-KR");
 
-	function uncomma(str) {
-		str = String(str);
-		return str.replace(/[^\d]+/g, "");
-	}
-	
-		var swiper = new Swiper(".mySwiper", {
-			spaceBetween : 30, // 슬라이드 사이 여백
-
-			slidesPerView : 'auto', // 한 슬라이드에 보여줄 갯수
-			centeredSlides : true, //센터모드
-			autoplay : { //자동슬라이드 (false-비활성화)
-				delay : 3000, // 시간 설정
-				disableOnInteraction : false, // false-스와이프 후 자동 재생
-			},
-
-			loop : false, // 슬라이드 반복 여부
-
-			loopAdditionalSlides : 1,
-
-			// 슬라이드 반복 시 마지막 슬라이드에서 다음 슬라이드가 보여지지 않는 현상 수정
-			pagination : { // 호출(pager) 여부
-				el : ".swiper-pagination", //버튼을 담을 태그 설정
-				clickable : true, // 버튼 클릭 여부
-			},
-			navigation : { // 버튼
-				nextEl : ".swiper-button-next",
-				prevEl : ".swiper-button-prev",
-			},
+	// ---------- 사진 슬라이드 ----------
+	if (document.querySelector(".detailSwiper")) {
+		new Swiper(".detailSwiper", {
+			spaceBetween: 0,
+			pagination: { el: ".swiper-pagination", clickable: true },
+			navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
 		});
-	</script>
+	}
+
+	// ---------- 남은 시간 ----------
+	const box = document.getElementById("countDown");
+	const boxText = box.querySelector(".text");
+	function pad(n) { return String(n).padStart(2, "0"); }
+	function tick() {
+		const now = new Date(), s = new Date(START), e = new Date(END);
+		if (isNaN(s) || isNaN(e)) return;
+		let target, prefix;
+		if (now < s) { target = s; prefix = "경매 시작까지 "; box.className = "ma-countdown ready"; }
+		else if (now < e) { target = e; prefix = "마감까지 "; box.className = "ma-countdown"; }
+		else {
+			box.className = "ma-countdown ended";
+			boxText.textContent = "경매가 마감되었습니다";
+			document.querySelectorAll("#bidBtn, #minBidBtn").forEach((b) => (b.disabled = true));
+			clearInterval(timer);
+			return;
+		}
+		const t = Math.floor((target - now) / 1000);
+		const d = Math.floor(t / 86400), h = Math.floor((t % 86400) / 3600), m = Math.floor((t % 3600) / 60), sec = t % 60;
+		boxText.textContent = prefix + (d > 0 ? d + "일 " : "") + pad(h) + ":" + pad(m) + ":" + pad(sec);
+	}
+	const timer = setInterval(tick, 1000);
+	tick();
+
+	// ---------- 입찰 ----------
+	const priceInput = document.getElementById("bidPrice");
+	if (priceInput) {
+		const hint = document.getElementById("bidHint");
+		const amount = () => (document.getElementById("amount") ? Number(document.getElementById("amount").value) : 1);
+		const price = () => Number(priceInput.value.replace(/[^\d]/g, ""));
+
+		priceInput.addEventListener("input", () => {
+			const v = price();
+			priceInput.value = v ? won(v) : "";
+			hint.classList.toggle("text-danger", v > 0 && v < MIN_BID);
+		});
+
+		function bid(value) {
+			if (!value || value < MIN_BID) {
+				alert(won(MIN_BID) + "원 이상으로 입찰해주세요.");
+				priceInput.focus();
+				return;
+			}
+			if (!confirm(won(value) + "원에 입찰할까요?")) return;
+			post("/web/product-api/product_auction", "PUT", { anum: ANUM, start_amt: value, amount: amount() })
+				.then(() => location.reload())
+				.catch((err) => alert(err.message));
+		}
+		document.getElementById("bidBtn").addEventListener("click", () => bid(price()));
+		document.getElementById("minBidBtn").addEventListener("click", () => bid(MIN_BID));
+		priceInput.addEventListener("keydown", (e) => { if (e.key === "Enter") bid(price()); });
+	}
+
+	// ---------- 문의 작성 ----------
+	const subject = document.getElementById("subject");
+	if (subject) {
+		const contents = document.getElementById("contents");
+		const createBtn = document.getElementById("boardCreate");
+		const check = () => (createBtn.disabled = !subject.value.trim() || !contents.value.trim());
+		subject.addEventListener("input", check);
+		contents.addEventListener("input", check);
+		document.getElementById("board-cancel").addEventListener("click", () => { subject.value = ""; contents.value = ""; check(); });
+		createBtn.addEventListener("click", () => {
+			post("/web/product-api/create_board", "POST", { anum: ANUM, subject: subject.value, contents: contents.value })
+				.then(() => location.reload())
+				.catch((err) => alert(err.message));
+		});
+	}
+
+	// ---------- 답글 ----------
+	document.querySelectorAll(".ma-qna .item").forEach((item) => {
+		const qnum = Number(item.dataset.qnum);
+		const memos = item.querySelector(".memos");
+		const form = item.querySelector(".memo-form");
+		const toggle = item.querySelector(".memo-toggle");
+		let loaded = false;
+
+		function load() {
+			return post("/web/product-api/memoList", "POST", { qnum: qnum }).then((text) => {
+				const list = JSON.parse(text);
+				memos.innerHTML = "";
+				list.forEach((m) => {
+					// 답글은 textContent 로만 넣는다 (스크립트 삽입 방지)
+					const row = document.createElement("p");
+					const who = document.createElement("b");
+					who.textContent = m.name || "회원";
+					const time = document.createElement("time");
+					time.textContent = String(m.wdate || "").substring(0, 16);
+					row.append(who, document.createTextNode(m.memo), time);
+					memos.appendChild(row);
+				});
+				toggle.hidden = list.length === 0;
+				toggle.innerHTML = '<i class="bi bi-chat"></i> 답글 ' + list.length + "개";
+				loaded = true;
+			});
+		}
+
+		toggle.addEventListener("click", () => {
+			const open = memos.style.display === "block";
+			if (open) { memos.style.display = "none"; return; }
+			(loaded ? Promise.resolve() : load()).then(() => (memos.style.display = "block"));
+		});
+
+		const writeBtn = item.querySelector(".memo-write");
+		if (writeBtn) {
+			writeBtn.addEventListener("click", () => {
+				form.style.display = form.style.display === "flex" ? "none" : "flex";
+				if (form.style.display === "flex") form.querySelector(".memo-text").focus();
+			});
+			const input = form.querySelector(".memo-text");
+			const send = () => {
+				if (!input.value.trim()) return;
+				post("/web/product-api/create_memo", "POST", { qnum: qnum, memo: input.value })
+					.then(() => { input.value = ""; return load(); })
+					.then(() => (memos.style.display = "block"))
+					.catch((err) => alert(err.message));
+			};
+			form.querySelector(".memoCreate").addEventListener("click", send);
+			input.addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
+		}
+	});
+})();
+</script>
+</body>
 </html>

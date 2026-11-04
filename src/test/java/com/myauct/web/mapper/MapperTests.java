@@ -1,28 +1,23 @@
 package com.myauct.web.mapper;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.myauct.web.domain.user.dao.UserDAO;
 
-import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("file:src/main/webapp/WEB-INF/spring/root-context.xml")
-@Log4j
+/** DB 연결이 필요한 테스트 */
+@SpringJUnitConfig(locations = "file:src/main/webapp/WEB-INF/spring/root-context.xml")
+@Slf4j
 public class MapperTests {
-	
+
 	@Autowired
 	private UserDAO userMapper;
-	
-	
+
 	@Test
 	public void getUser() {
-		log.info("-------getUserList()호출----");
-		userMapper.getUserList();
+		log.info("{}", userMapper.getUser("DDD"));
 	}
-	
 }

@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+    <%@ taglib uri="jakarta.tags.core" prefix="c" %>
         <c:set var="path" value="${pageContext.request.contextPath}" />
         <!DOCTYPE html>
         <html lang="en">
@@ -13,30 +13,28 @@
                 integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
                 crossorigin="anonymous">
 
-        </head>
+        <%@ include file="/WEB-INF/views/include/authHead.jsp"%>
+</head>
 
-        <body>
-            <div class="container d-flex justify-content-center align-items-center" style="width:380px;">
-                <form class="row g-3" method="post">
-                    <div class="col-sm-12 mb-2">
-                        <label for="validationServer01" class="form-label">이름</label>
-                        <input type="text" class="form-control" name="name" id="name" placeholder="이름">
-                    </div>
-                    <label for="validationServer02" class="form-label p-0 m-0 ms-2">핸드폰 번호</label>
-                    <div class="col-sm-8 mt-2">
-                        <input type="text" class="form-control" id="phone" name="phone" placeholder="전화번호">
-                    </div>
-                    <div class="col-sm-4 m-0">
-                        <button class="btn btn-lg btn-primary w-100" type="button">본인인증</button>
-                    </div>
-                    <div class="col-sm-12">
-                        <input type="text" class="form-control" id="validationServer02" placeholder="안증번호">
-                    </div>
-                    <div class="col-sm-12">
+        <body class="ma-auth">
+            <div class="ma-auth-wrap">
+                <a class="ma-auth-logo" href="/web/aucts/index"><i class="bi bi-hammer"></i>MyAuct</a>
+                <p class="ma-auth-sub">가입할 때 입력한 이름과 휴대폰 번호로<br>아이디를 찾을 수 있습니다.</p>
+                <main class="ma-auth-card">
+                    <form method="post" onsubmit="return false">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">이름</label>
+                            <input type="text" class="form-control" name="name" id="name" placeholder="홍길동">
+                        </div>
+                        <div class="mb-4">
+                            <label for="phone" class="form-label">휴대폰 번호</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="010-0000-0000">
+                        </div>
                         <button class="btn btn-lg btn-primary w-100" type="button" id="idFind">아이디 찾기</button>
-                    </div>
-                </form>
+                    </form>
+                </main>
             </div>
+
 
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
                 integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"

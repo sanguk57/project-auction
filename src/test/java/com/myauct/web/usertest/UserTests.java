@@ -1,59 +1,50 @@
 package com.myauct.web.usertest;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import javax.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import com.myauct.web.domain.user.dto.UserDTO;
 import com.myauct.web.domain.user.service.UserService;
 
-import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("file:src/main/webapp/WEB-INF/spring/root-context.xml")
-@Log4j
+/** DB 연결이 필요한 테스트 */
+@SpringJUnitConfig(locations = "file:src/main/webapp/WEB-INF/spring/root-context.xml")
+@Slf4j
 public class UserTests {
-    @Inject
-    private UserService userService;
+	@Autowired
+	private UserService userService;
 
-    @Test
-    public void userListTest() {
-    	userService.getUserList();
-    	log.info("getUserList() TEST OK...");
-    }
-    
-//     아이디 찾기 
-    @Test
-    public void getUserIdTest() {
-    	String name = "세종이", phone ="010-0184-5154" ;
-    	userService.getUserId(name, phone);
-    	log.info("user_id");
-    	log.info(userService.getUserId(name, phone));
-    }
-    @Test
-    public void getUnum() {
-    	String user_id = "DD", phone ="010-0184-5154" ;
-    	userService.getUnum(user_id, phone);
-    	log.info(userService.getUnum(user_id, phone));
-    }
-    
-    @Test
-    public void userIdChkTest() {
-    	userService.userIdChk("CCC");
-    	log.info(userService.userIdChk("CCC"));
-    }
-    
-    @Test
-    public void userPwChkTest() {
-    	userService.userPwChk("1234");
-    }
-    @Test
-    public void userChkTest() {
-    	int cnt = userService.userChk("BBB", "1234");
-    	log.info("--- UserChk ---");
-    	log.info(cnt);
-    }
+	// 아이디 찾기
+	@Test
+	public void getUserIdTest() {
+		log.info(userService.getUserId("세종이", "010-0184-5154"));
+	}
+
+	@Test
+	public void getUnum() {
+		log.info("{}", userService.getUnum("DD", "010-0184-5154"));
+	}
+
+	@Test
+	public void userIdChkTest() {
+		log.info("{}", userService.existsUserId("CCC"));
+	}
+
+	@Test
+	public void loginWrongPassword() {
+		assertNull(userService.login("BBB", "wrong-password"));
+	}
+
+	@Test
+	public void loginResultHasNoPassword() {
+		UserDTO user = userService.login("BBB", "1234");
+		if (user != null) {
+			assertNull(user.getPassword(), "세션에 넣을 객체에 비밀번호가 남아 있으면 안 됨");
+		}
+	}
 }

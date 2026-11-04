@@ -1,0 +1,21 @@
+# 비밀정보 (DB 비밀번호 등) - app.properties.example 을 복사해서 사용
+src/main/resources/config/app.properties
+
+# 사용자가 올린 파일
+src/main/webapp/resources/upload/
+
+# 빌드 결과물 / 로그
+target/
+logs/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.settings/
+.classpath
+.project
+.factorypath
+.springBeans
+.idea/
+*.iml
+.vscode/

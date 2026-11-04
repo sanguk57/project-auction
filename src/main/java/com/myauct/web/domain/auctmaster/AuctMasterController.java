@@ -1,415 +1,172 @@
 package com.myauct.web.domain.auctmaster;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
-import javax.servlet.http.HttpSession;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.myauct.web.domain.auctboard.dto.AuctBoardDTO;
-import com.myauct.web.domain.auctboard.service.AuctBoardMemoService;
 import com.myauct.web.domain.auctboard.service.AuctBoardService;
 import com.myauct.web.domain.auctcategory.dto.AuctCategoryDTO;
 import com.myauct.web.domain.auctcategory.service.AuctCategoryService;
 import com.myauct.web.domain.auctconcern.service.AuctConcernService;
-import com.myauct.web.domain.auctmaster.dto.AuctFileUploadDTO;
 import com.myauct.web.domain.auctmaster.dto.AuctMasterDTO;
-import com.myauct.web.domain.auctmaster.service.AuctFileUploadService;
 import com.myauct.web.domain.auctmaster.service.AuctMasterService;
 import com.myauct.web.domain.user.dto.UserDTO;
-import com.myauct.web.domain.user.service.UserService;
 import com.myauct.web.domain.user.service.global.util.PagingDTO;
+import com.myauct.web.global.BusinessException;
+import com.myauct.web.global.SessionConst;
 
 import lombok.RequiredArgsConstructor;
-import net.coobird.thumbnailator.Thumbnails;
 
+/*
+ * 삭제: /aucts/loginUser (아이디만으로 로그인되던 주소 → 로그인은 /rest/loginChk 에서 처리)
+ *
+ * 상품 등록/수정/삭제 주소는 servlet-context.xml 의 LoginCheckInterceptor 가
+ * 로그인 여부를 먼저 확인하므로, 여기서 user 는 null 이 아니다.
+ */
 @Controller
 @RequestMapping("/aucts")
 @RequiredArgsConstructor
 public class AuctMasterController {
 
-	private static final Logger logger = LoggerFactory.getLogger(AuctMasterController.class);
-
-	private final UserService userService;
 	private final AuctCategoryService auctCategoryService;
 	private final AuctMasterService auctMasterService;
-	private final AuctFileUploadService auctFileUploadService;
 	private final AuctConcernService auctConcernService;
 	private final AuctBoardService auctBoardService;
-	private final AuctBoardMemoService auctBoardMemoService;
-	
-	@RequestMapping("/loginUser")
-	public String loginUser(String user_id, HttpSession session) {
-		
-		if (session.isNew()) {
-			UserDTO dto = userService.getUser(user_id);
-			session.setAttribute("user", dto);
-		} else {
-			session.removeAttribute("user");
-			UserDTO dto = userService.getUser(user_id);
-			session.setAttribute("user", dto);
-		}
-		
-		return "redirect:/aucts/index";
-	}
-	@RequestMapping("/index")
-	public void index(
-			 HttpSession session, Model model, PagingDTO pagingDTO,
-			 @RequestParam(value="value", required=false, defaultValue="") String value,
-			@RequestParam(value="key", required=false) String key,
-			@RequestParam(defaultValue = "1") int nowPage,
-			@RequestParam(defaultValue = "4") int cntPerPage) {
-		
-		Map<String, Integer> cntMap = new HashMap<String, Integer>();
-		// 세션에 로그인 회원 정보 보관
-		
-		int unum = 0;
-		int userProductCnt = 0;
-		int concernCnt = 0;
-		int boardCnt = 0;
-		int total  = 0;
-		
-		if(session.getAttribute("user") != null) {			
-			UserDTO dto = (UserDTO) session.getAttribute("user");
-			unum = dto.getUnum();
-			
-			userProductCnt = auctMasterService.getUserProductCnt(unum);
-			cntMap.put("userProductCnt", userProductCnt);
-			
-			concernCnt = auctConcernService.concernCnt(unum);
-			cntMap.put("concernCnt", concernCnt);
-			
-			total = auctMasterService.getProductCnt(value);
-			cntMap.put("productCnt", total);
-			
-			boardCnt = auctBoardService.userBoardCnt(unum);
-			cntMap.put("userBoardCnt", boardCnt);
 
-		    if(key != null) {
-		        if(key.equals("A")) {
-		            pagingDTO = new PagingDTO(userProductCnt, nowPage, cntPerPage, value, key, unum);
-		            model.addAttribute("paging", pagingDTO);
-		        } else if(key.equals("B")) {
-		            pagingDTO = new PagingDTO(concernCnt, nowPage, cntPerPage, value, key, unum);
-		            model.addAttribute("paging", pagingDTO);
-		        } else {
-		            pagingDTO = new PagingDTO(total, nowPage, cntPerPage, value, key, unum);
-		            model.addAttribute("paging", pagingDTO);
-		        }
-		    } else {
-		        pagingDTO = new PagingDTO(total, nowPage, cntPerPage, value, key, unum);
-		        model.addAttribute("paging", pagingDTO);
-		    }
-		} else {
-		    total = auctMasterService.getProductCnt(value);
-		    cntMap.put("productCnt", total);
-		    
-		    pagingDTO = new PagingDTO(total, nowPage, cntPerPage, value, key, unum);
-		    model.addAttribute("paging", pagingDTO);
-		}
-		
-		
-		List<AuctMasterDTO> productList = auctMasterService.getProductList(pagingDTO);
-		model.addAttribute("cntMap", cntMap);
-		model.addAttribute("productList", productList);
+	@RequestMapping("/index")
+	public void index(@SessionAttribute(name = SessionConst.LOGIN_USER, required = false) UserDTO user,
+			Model model, @RequestParam(defaultValue = "") String value,
+			@RequestParam(required = false) String key, @RequestParam(defaultValue = "1") int nowPage,
+			@RequestParam(defaultValue = "8") int cntPerPage) {
+		loadProductList(user, model, value, key, nowPage, cntPerPage);
 	}
 
 	@GetMapping("/about")
-	public void about( HttpSession session, Model model, PagingDTO pagingDTO,
-			@RequestParam(value="value", required=false, defaultValue="") String value,
-			@RequestParam(value="key", required=false) String key,
-			@RequestParam(defaultValue = "1") int nowPage,
+	public void about(@SessionAttribute(name = SessionConst.LOGIN_USER, required = false) UserDTO user,
+			Model model, @RequestParam(defaultValue = "") String value,
+			@RequestParam(required = false) String key, @RequestParam(defaultValue = "1") int nowPage,
 			@RequestParam(defaultValue = "12") int cntPerPage) {
-		
-		Map<String, Integer> cntMap = new HashMap<String, Integer>();
-		// 세션에 로그인 회원 정보 보관
-		
+		loadProductList(user, model, value, key, nowPage, cntPerPage);
+	}
+
+	/** index 와 about 에 똑같은 코드가 60줄씩 복사돼 있던 것을 하나로 합침 */
+	private void loadProductList(UserDTO user, Model model, String value, String key, int nowPage,
+			int cntPerPage) {
+		Map<String, Integer> cntMap = new HashMap<>();
+		int total = auctMasterService.getProductCnt(value);
+		cntMap.put("productCnt", total);
+
 		int unum = 0;
-		int userProductCnt = 0;
-		int concernCnt = 0;
-		int boardCnt = 0;
-		int total  = 0;
-		
-		if(session.getAttribute("user") != null) {			
-			UserDTO dto = (UserDTO) session.getAttribute("user");
-			unum = dto.getUnum();
-			
-			userProductCnt = auctMasterService.getUserProductCnt(unum);
+		int pagingTotal = total;
+		if (user != null) {
+			unum = user.getUnum();
+			int userProductCnt = auctMasterService.getUserProductCnt(unum);
+			int concernCnt = auctConcernService.concernCnt(unum);
 			cntMap.put("userProductCnt", userProductCnt);
-			
-			concernCnt = auctConcernService.concernCnt(unum);
 			cntMap.put("concernCnt", concernCnt);
-			
-			total = auctMasterService.getProductCnt(value);
-			cntMap.put("productCnt", total);
-			
-			boardCnt = auctBoardService.userBoardCnt(unum);
-			cntMap.put("userBoardCnt", boardCnt);
+			cntMap.put("userBoardCnt", auctBoardService.userBoardCnt(unum));
 
-			  if(key != null) {
-			        if(key.equals("A")) {
-			            pagingDTO = new PagingDTO(userProductCnt, nowPage, cntPerPage, value, key, unum);
-			            model.addAttribute("paging", pagingDTO);
-			        } else if(key.equals("B")) {
-			            pagingDTO = new PagingDTO(concernCnt, nowPage, cntPerPage, value, key, unum);
-			            model.addAttribute("paging", pagingDTO);
-			        } else {
-			            pagingDTO = new PagingDTO(total, nowPage, cntPerPage, value, key, unum);
-			            model.addAttribute("paging", pagingDTO);
-			        }
-			    } else {
-			        pagingDTO = new PagingDTO(total, nowPage, cntPerPage, value, key, unum);
-			        model.addAttribute("paging", pagingDTO);
-			    }
-			} else {
-			    total = auctMasterService.getProductCnt(value);
-			    cntMap.put("productCnt", total);
-			    
-			    pagingDTO = new PagingDTO(total, nowPage, cntPerPage, value, key, unum);
-			    model.addAttribute("paging", pagingDTO);
+			if ("A".equals(key)) {
+				pagingTotal = userProductCnt;
+			} else if ("B".equals(key)) {
+				pagingTotal = concernCnt;
 			}
-		
-		
-		List<AuctMasterDTO> productList = auctMasterService.getProductList(pagingDTO);
+		} else if ("A".equals(key) || "B".equals(key)) {
+			key = null; // 로그인 안 했으면 '내 상품/찜 목록' 대신 전체 목록
+		}
+
+		PagingDTO paging = new PagingDTO(pagingTotal, nowPage, cntPerPage, value, key, unum);
+		model.addAttribute("paging", paging);
 		model.addAttribute("cntMap", cntMap);
-		model.addAttribute("productList", productList);
+		model.addAttribute("productList", auctMasterService.getProductList(paging));
 	}
 
-	@GetMapping("/contact")
-	public void contact() {
-	}
+	// contact / pricing / services / sample-inner-page 는 물류 회사 템플릿 페이지라 삭제함
 
-	@RequestMapping("/productEnrollment")
-	public void get_a_quote() {
+	@GetMapping("/productEnrollment")
+	public void productEnrollment(Model model) {
+		// 예전: 화면이 뜬 뒤 Ajax 로 카테고리를 따로 불러왔음 → 처음부터 함께 그린다
+		model.addAttribute("categoryList", auctCategoryService.getCategoryList());
 	}
 
 	@RequestMapping("/jusoPopup")
 	public void jusoPopup() {
 	}
 
-	@GetMapping("/pricing")
-	public void pricing() {
-	}
-	
-	@GetMapping("/sample-inner-page")
-	public void sample_inner_page() {
-	}
-
-	@RequestMapping("/service-details")
-	public void service_details(Model model) {
-	}
-
-	@GetMapping("/services")
-	public void services() {
+	/** 상품 등록 */
+	@PostMapping("/auctionItem")
+	public String auctionItem(AuctMasterDTO auctMasterDTO, AuctCategoryDTO categoryDTO,
+			@RequestParam(required = false) MultipartFile[] uploadFile,
+			@SessionAttribute(SessionConst.LOGIN_USER) UserDTO user, RedirectAttributes ra) {
+		try {
+			int anum = auctMasterService.registerProduct(auctMasterDTO, categoryDTO, uploadFile, user.getUnum());
+			return "redirect:/aucts/productView?anum=" + anum;
+		} catch (BusinessException e) {
+			ra.addFlashAttribute("errorMsg", e.getMessage());
+			return "redirect:/aucts/productEnrollment";
+		}
 	}
 
+	/** 상품 수정 화면 (본인 상품만) */
 	@GetMapping("/modifyProduct")
-	public void modifyProduct(int anum, Model model) {
+	public String modifyProduct(int anum, Model model, @SessionAttribute(SessionConst.LOGIN_USER) UserDTO user,
+			RedirectAttributes ra) {
 		AuctMasterDTO dto = auctMasterService.getProduct(anum);
-		
-		 String category =  auctCategoryService.getCategory(dto.getCnum());
-		 model.addAttribute("category", category);
-		model.addAttribute("aDTO",dto);
+		if (dto.getUnum() != user.getUnum()) {
+			ra.addFlashAttribute("errorMsg", "본인이 등록한 상품만 수정할 수 있습니다.");
+			return "redirect:/aucts/productView?anum=" + anum;
+		}
+		model.addAttribute("category", auctCategoryService.getCategory(dto.getCnum()));
+		model.addAttribute("categoryList", auctCategoryService.getCategoryList());
+		model.addAttribute("uploadFileList", auctMasterService.getImagePaths(anum));
+		model.addAttribute("aDTO", dto);
+		return "aucts/modifyProduct";
 	}
-	
+
+	/** 상품 수정 저장 (예전: 수정 화면이 등록 주소로 전송돼서 수정 대신 새 상품이 생겼음) */
 	@PostMapping("/productModify")
-	public String productModify(AuctMasterDTO auctMasterDTO, MultipartFile[] uploadFile, AuctCategoryDTO categoryDTO) {
-		if(categoryDTO.getCnum() == 0) {
-			auctCategoryService.registerCategory(categoryDTO);
-			auctMasterDTO.setCnum(categoryDTO.getCnum());
+	public String productModify(AuctMasterDTO auctMasterDTO, AuctCategoryDTO categoryDTO,
+			@RequestParam(required = false) MultipartFile[] uploadFile,
+			@SessionAttribute(SessionConst.LOGIN_USER) UserDTO user, RedirectAttributes ra) {
+		try {
+			auctMasterService.modifyProduct(auctMasterDTO, categoryDTO, uploadFile, user.getUnum());
+		} catch (BusinessException e) {
+			ra.addFlashAttribute("errorMsg", e.getMessage());
 		}
-		auctMasterService.moidfyProduct(auctMasterDTO);
-		return "redirect:/aucts/productView";
+		// 예전: anum 없이 productView 로 이동해서 400 에러
+		return "redirect:/aucts/productView?anum=" + auctMasterDTO.getAnum();
 	}
-	
-	@GetMapping("/deleteProduct")
-	public String deleteProduct (int anum) {
-		 auctMasterService.deleteProduct(anum);
-		 List<AuctFileUploadDTO> imgFileLists = auctFileUploadService.fileList(anum);
-		 for(AuctFileUploadDTO fileDTO : imgFileLists) {
-		 Path filePath1 = Paths.get("/kuk2028/tomcat/webapps/upload/"+fileDTO.getUpload_path()+"/"+fileDTO.getFile_name()+"_"+fileDTO.getFile_dname()+fileDTO.getFile_ext());
-		 Path filePath2 = Paths.get("/kuk2028/tomcat/webapps/upload/"+fileDTO.getUpload_path()+"/"+"s_"+fileDTO.getFile_name()+"_"+fileDTO.getFile_dname()+fileDTO.getFile_ext());
-	        try {
-	            // 파일 삭제
-	            Files.delete(filePath1);
-	            Files.delete(filePath2);
-	            
-	        } catch (NoSuchFileException e) {
-	            System.out.println("삭제하려는 파일/디렉토리가 없습니다");
-	        } 
-	         catch (IOException e) {
-	            e.printStackTrace();
-	        }
-	        
-		 }
-	        
-		 auctFileUploadService.deleteFile(anum);
+
+	/** 상품 삭제 (예전: 링크(GET)로 삭제 + 본인 확인 없음 → 주소만 알면 누구나 남의 상품 삭제 가능) */
+	@PostMapping("/deleteProduct")
+	public String deleteProduct(int anum, @SessionAttribute(SessionConst.LOGIN_USER) UserDTO user,
+			RedirectAttributes ra) {
+		try {
+			auctMasterService.deleteProduct(anum, user.getUnum());
+		} catch (BusinessException e) {
+			ra.addFlashAttribute("errorMsg", e.getMessage());
+			return "redirect:/aucts/productView?anum=" + anum;
+		}
 		return "redirect:/aucts/index";
 	}
-	
-	
-	@RequestMapping("/auctionItem")
-	public String auctioniItem(AuctMasterDTO auctMasterDTO, AuctCategoryDTO categoryDTO, MultipartFile[] uploadFile) {
 
-		System.out.println(auctMasterDTO);
-		System.out.println(categoryDTO);
-		if(categoryDTO.getCnum() == 0) {
-			auctCategoryService.registerCategory(categoryDTO);
-			auctMasterDTO.setCnum(categoryDTO.getCnum());
-		}
-		auctMasterService.createProduct(auctMasterDTO);
-		
-		int anum = auctMasterDTO.getAnum();
-		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Date date = new Date();
-		String str = sdf.format(date);
-		String datePath = str.replace("-", File.separator);
-		String uploadFolder = File.separator + "Users" + File.separator + "Kungas_57" + File.separator + "Desktop"
-				+ File.separator + "study_java" + File.separator + "Spring_STS" + File.separator + "myAuct"
-				+ File.separator + "src" + File.separator + "main" + File.separator + "webapp" + File.separator
-				+ "resources" + File.separator + "upload";
-
-		File uploadPath = new File(uploadFolder, datePath);
-
-		// 폴더가 없으면 생성
-		if (uploadPath.exists() == false) {
-			uploadPath.mkdirs();
-		}
-
-		logger.info(uploadFile[0].getName() + ", " + uploadFile[0].getSize());
-		auctMasterDTO.setProd_img(uploadFile[0].getName());
-		
-		for (MultipartFile multipartFile : uploadFile) {
-			
-			String uploadFileName = multipartFile.getOriginalFilename();
-			logger.info(uploadFileName);
-			
-			AuctFileUploadDTO auctFileUploadDTO = new AuctFileUploadDTO();
-			
-			// 확장자 추출 (.jpg, .png)
-			String ext = uploadFileName.substring(uploadFileName.lastIndexOf("."));
-			
-			// 파일명 추출
-			String filerename = uploadFileName.substring(0, uploadFileName.lastIndexOf("."));
-			auctFileUploadDTO.setFile_name(filerename);
-
-			String now = new SimpleDateFormat("yyyyMMdd_HmssS").format(new Date());
-			auctFileUploadDTO.setFile_dname(now);
-			
-			auctFileUploadDTO.setUpload_path(datePath);
-			auctFileUploadDTO.setAnum(anum);
-			auctFileUploadDTO.setFile_ext(ext);
-			
-			auctFileUploadService.fileUpload(auctFileUploadDTO);
-			
-			// 새로운 파일 이름('업로드일시.확장자')
-			String newFileName = filerename + "_" + now + ext;
-
-			/* 파일 위치, 파일 이름을 합친 File 객체 */
-			File saveFile = new File(uploadPath, newFileName);
-
-			/* 파일 저장 */
-			try {
-				multipartFile.transferTo(saveFile);
-				
-//				/*썸네일 이미지*/
-//				File thumbnailFile = new File(uploadPath, "s_" + newFileName);
-//				
-//				BufferedImage bo_image = ImageIO.read(saveFile);
-//				
-//				/* 비율 */
-//				double ratio = 3;
-//				
-//				/*넓이 높이*/
-//				int width = (int) (bo_image.getWidth() / ratio);
-//				int height = (int) (bo_image.getHeight() / ratio);
-//				
-//				BufferedImage bt_image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
-//
-//				Graphics2D graphic = bt_image.createGraphics();
-//
-//				graphic.drawImage(bo_image, 0, 0, width, height, null);
-//
-//				ImageIO.write(bt_image, "png", thumbnailFile);
-				
-				// thumbnailator 라이브러리 사용 
-				
-				File thumbnailFile = new File(uploadPath, "s_" + newFileName);
-
-				BufferedImage bo_image = ImageIO.read(saveFile);
-
-				// 비율
-				double ratio = 3;
-				// 넓이 높이
-				int width = (int) (bo_image.getWidth() / ratio);
-				int height = (int) (bo_image.getHeight() / ratio);
-
-				Thumbnails.of(saveFile).size(width, height).toFile(thumbnailFile);
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			
-		} // for end
-
-		return "redirect:/aucts/index";
-	}
-	
+	/** 상품 상세 */
 	@GetMapping("/productView")
 	public String productView(int anum, Model model) {
-		List<String> uploadFileList = new ArrayList<String>();
-		List<String> nameList = new ArrayList<String>();
-		List<Integer> memoCntList = new ArrayList<Integer>();
-		
 		AuctMasterDTO auctMasterDTO = auctMasterService.getProduct(anum);
-		
-		List<AuctBoardDTO> boardList = auctBoardService.boardList();
-		
-		for(AuctBoardDTO dto : boardList) {
-			nameList.add(userService.getName(dto.getUnum()));
-//			memoCntList의 순서대로 qnum을 받아와 거기에 달린 답글을 List에 순서대로 저
-			memoCntList.add(auctBoardMemoService.MemoCnt(dto.getQnum()));
-		}
-		
-		
-		String category = auctCategoryService.getCategory(auctMasterDTO.getCnum());
-		
-		List<AuctFileUploadDTO> fileList = auctFileUploadService.fileList(anum);
-		
-		for(AuctFileUploadDTO dto : fileList) {
-			String sImgFile = dto.getUpload_path()+"/"+dto.getFile_name()+"_"+dto.getFile_dname()+dto.getFile_ext();
-			uploadFileList.add(sImgFile);
-		}
-		model.addAttribute("memoCntList", memoCntList);
-		model.addAttribute("boardList", boardList);
-		model.addAttribute("nameList", nameList);
 		model.addAttribute("auctMasterDTO", auctMasterDTO);
-		model.addAttribute("category", category);
-		model.addAttribute("uploadFileList", uploadFileList);
-		
+		model.addAttribute("category", auctCategoryService.getCategory(auctMasterDTO.getCnum()));
+		model.addAttribute("uploadFileList", auctMasterService.getImagePaths(anum));
+		model.addAttribute("boardList", auctBoardService.boardList(anum));
 		return "aucts/service-details";
 	}
 }

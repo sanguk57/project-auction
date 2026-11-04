@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myauct.web.domain.auctcategory.dao.AuctCategoryDAO">
+
+	<!-- 예전: selectKey 의 MAX(cnum) → 동시에 등록하면 엉뚱한 번호를 받을 수 있었음 -->
+	<insert id="registerCategory" useGeneratedKeys="true" keyProperty="cnum" keyColumn="cnum">
+		insert into Auct_Category (category) values (#{category})
+	</insert>
+
+	<update id="modifyCategory">
+		update Auct_Category set category = #{category} where cnum = #{cnum}
+	</update>
+
+	<select id="getCnum" resultType="integer">
+		select cnum from Auct_Category where category = #{category} limit 1
+	</select>
+
+	<select id="getCategoryList" resultType="AuctCategoryDTO">
+		select * from Auct_Category
+	</select>
+
+	<select id="getCategory" resultType="string">
+		select category from Auct_Category where cnum = #{cnum}
+	</select>
+</mapper>

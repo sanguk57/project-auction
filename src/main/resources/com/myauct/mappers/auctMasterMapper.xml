@@ -2,87 +2,117 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper
-	namespace="com.myauct.web.domain.auctmaster.dao.AuctMasterDAO">
+<mapper namespace="com.myauct.web.domain.auctmaster.dao.AuctMasterDAO">
 
-
-
-
-
-
-	<select id="getProductList"
-		resultType="AuctMasterDTO" parameterType="PagingDTO">
-			SELECT C.* FROM 
-(SELECT B.* FROM
-(SELECT @rownum:= @rownum + 1 RN, A.* 
-<choose>
-<when test="key == 'A'.toString()">
-from `Auct_Master` A, (select @rownum:=0) TMP where A.unum = #{unum} ORDER BY limit_amt desc) B) C
-</when>
-<when test="key == 'B'.toString()">
-from `Auct_Master` A INNER JOIN `Auct_Concern` B ON A.anum = B.`anum`, (select @rownum:=0) TMP where B.`unum` = #{unum}
-ORDER BY limit_amt desc) B) C
-</when>
-    <when test="value != null and value != ''">
-from `Auct_Master` A INNER JOIN `Auct_Category` B ON A.cnum = B.cnum, (select @rownum:=0) TMP where A.prod_name Like CONCAT('%',#{value},'%') OR B.category Like CONCAT('%',#{value},'%') ORDER BY limit_amt desc) B) C
-    </when>
-    <otherwise>
-from `Auct_Master` A, (select @rownum:=0) TMP ORDER BY limit_amt desc) B) C
-    </otherwise>
-  </choose>
-WHERE RN BETWEEN #{start} AND #{end};
+	<!--
+		목록 + 페이징
+		예전: @rownum 변수로 행 번호를 매긴 뒤 BETWEEN 으로 잘라냄 (테이블 전체를 읽어야 함)
+		지금: MySQL 의 LIMIT offset, count 사용
+		key = A : 내가 등록한 상품 / B : 내가 찜한 상품 / 그 외 : 전체(검색어 있으면 검색)
+	-->
+	<!--
+		카드에 필요한 카테고리 이름 / 첫 번째 썸네일도 함께 조회
+		(예전: 목록을 그린 뒤 썸네일을 Ajax 로 한 번 더 요청)
+	-->
+	<select id="getProductList" resultType="AuctMasterDTO" parameterType="PagingDTO">
+		select A.*, B.category,
+			(select concat(F.upload_path, '/s_', F.file_name, '_', F.file_dname, F.file_ext)
+			   from `Auct_FileUpload` F where F.anum = A.anum order by F.fnum limit 1) as thumb
+		from `Auct_Master` A
+		left join `Auct_Category` B on A.cnum = B.cnum
+		<choose>
+			<when test="key == 'A'.toString()">
+				where A.unum = #{unum}
+			</when>
+			<when test="key == 'B'.toString()">
+				inner join `Auct_Concern` C on A.anum = C.anum
+				where C.unum = #{unum}
+			</when>
+			<otherwise>
+				<if test="value != null and value != ''">
+					where (A.prod_name like concat('%', #{value}, '%')
+					    or B.category like concat('%', #{value}, '%'))
+				</if>
+			</otherwise>
+		</choose>
+		<!-- 진행 중인 경매 먼저, 그다음 시작 전, 마감은 맨 뒤 / 같은 상태 안에서는 마감이 가까운 순 -->
+		order by case when now() &lt; A.auct_start then 1 when now() &gt; A.auct_end then 2 else 0 end,
+			A.auct_end, A.anum desc
+		limit #{offset}, #{cntPerPage}
 	</select>
-	
+
+	<!-- 목록 쿼리와 같은 조건으로 세어야 페이지 수가 맞는다 (예전에는 INNER JOIN 이라 개수가 달라질 수 있었음) -->
+	<select id="getProductCnt" resultType="_int">
+		select count(*) from `Auct_Master` A
+		left join `Auct_Category` B on A.cnum = B.cnum
+		<if test="value != null and value != ''">
+			where (A.prod_name like concat('%', #{value}, '%')
+			    or B.category like concat('%', #{value}, '%'))
+		</if>
+	</select>
+
+	<!--
+		검색창 자동완성
+		 - 상품명 / 카테고리 이름 중 검색어가 들어간 것 (목록 검색과 같은 조건이라 고르면 결과가 반드시 나옴)
+		 - 카테고리는 상품이 1개 이상 있는 것만
+		 - 정렬: 검색어로 시작하는 것 먼저 → 상품 많은 순 → 짧은 순
+		 - keyword 는 서비스에서 LIKE 특수문자(% _ \)를 이스케이프해서 넘김 (MySQL 기본 이스케이프 문자 \)
+	-->
+	<select id="suggest" resultType="com.myauct.web.domain.auctmaster.dto.SuggestDTO">
+		select keyword, type, cnt from (
+			select A.prod_name as keyword, 'PRODUCT' as type, count(*) as cnt
+			from `Auct_Master` A
+			where A.prod_name like concat('%', #{keyword}, '%')
+			group by A.prod_name
+			union all
+			select B.category, 'CATEGORY', count(*)
+			from `Auct_Category` B
+			inner join `Auct_Master` A on A.cnum = B.cnum
+			where B.category like concat('%', #{keyword}, '%')
+			group by B.category
+		) S
+		order by (keyword like concat(#{keyword}, '%')) desc, cnt desc, char_length(keyword), keyword
+		limit #{limit}
+	</select>
+
+	<select id="getUserProductCnt" resultType="_int">
+		select count(*) from `Auct_Master` where unum = #{unum}
+	</select>
+
 	<select id="getProduct" resultType="AuctMasterDTO">
 		select * from `Auct_Master` where anum = #{anum}
 	</select>
-	
-	<select id="getProductAmt" resultType="_int">
-		select start_amt from `Auct_Master` where anum = #{anum}
-	</select>
-	
-	<update id="modifyProductAmt">
-		update Auct_Master set start_amt =  #{start_amt}, join_cnt = #{join_cnt} where anum = #{anum}
-	</update>
-	
-	<insert id="createProduct">
-		insert into Auct_Master (unum, cnum, prod_title, prod_name, sales_addr,
-		prod_type,
-		as_type, start_amt, limit_type, limit_amt, join_amt,
-		curr_amt,
-		auct_start, auct_end, trans_type, contents, total_cnt)
-		values (#{unum}, #{cnum}, #{prod_title}, #{prod_name}, #{sales_addr},
-		#{prod_type},
-		#{as_type}, #{start_amt}, #{limit_type}, #{limit_amt},
-		#{join_amt},
-		#{curr_amt}, #{auct_start}, #{auct_end}, #{trans_type},
-		#{contents}, #{total_cnt})
-		
-		<selectKey order="AFTER" keyProperty="anum"
-			resultType="int">
-			select MAX(anum) from `Auct_Master`
-		</selectKey>
+
+	<!-- 예전: selectKey 의 MAX(anum) → 동시에 두 명이 등록하면 다른 사람 상품 번호를 받을 수 있었음 -->
+	<insert id="createProduct" useGeneratedKeys="true" keyProperty="anum" keyColumn="anum">
+		insert into Auct_Master (unum, cnum, prod_title, prod_name, sales_addr, prod_type,
+			as_type, start_amt, limit_type, limit_amt, join_amt, curr_amt,
+			auct_start, auct_end, trans_type, contents, total_cnt)
+		values (#{unum}, #{cnum}, #{prod_title}, #{prod_name}, #{sales_addr}, #{prod_type},
+			#{as_type}, #{start_amt}, #{limit_type}, #{limit_amt}, #{join_amt}, #{curr_amt},
+			#{auct_start}, #{auct_end}, #{trans_type}, #{contents}, #{total_cnt})
 	</insert>
-	
-	<select id="getProductCnt" resultType="_int" parameterType="string">
-	select count(*) from `Auct_Master` A INNER JOIN `Auct_Category` B ON A.cnum = B.cnum
-	where prod_name Like CONCAT('%',#{value},'%') OR category Like CONCAT('%',#{value},'%')
-	</select>
-	
-	<select id="getUserProductCnt" resultType="_int">
-	select count(*) from `Auct_Master` where unum = #{unum}
-	</select>
-	
-	<delete id="deleteProduct">
-	DELETE FROM Auct_Master WHERE anum = #{anum}
-	</delete>
-	
-	<update id="moidfyProduct">
-		update Auct_Master set cnum = #{cnum}, prod_title#{prod_title}, prod_name=#{prod_name}, sales_addr = #{sales_addr},
-		prod_type = #{prod_type}, as_type = #{as_type}, start_amt = #{start_amt}, limit_type = #{limit_type}, limit_amt = #{limit_amt},
-		join_amt = #{join_amt}, curr_amt = #{curr_amt}, auct_start = #{auct_start}, auct_end = #{auct_end}, trans_type = #{trans_type},
-		contents = #{contents} 
-		where anum = #{anum}
+
+	<!-- 예전: "prod_title#{prod_title}" 처럼 = 이 빠져 있어서 상품 수정이 항상 SQL 에러 -->
+	<update id="modifyProduct">
+		update Auct_Master
+		set cnum = #{cnum}, prod_title = #{prod_title}, prod_name = #{prod_name},
+			sales_addr = #{sales_addr}, prod_type = #{prod_type}, as_type = #{as_type},
+			start_amt = #{start_amt}, limit_type = #{limit_type}, limit_amt = #{limit_amt},
+			join_amt = #{join_amt}, curr_amt = #{curr_amt}, auct_start = #{auct_start},
+			auct_end = #{auct_end}, trans_type = #{trans_type}, contents = #{contents},
+			total_cnt = #{total_cnt}
+		where anum = #{anum} and unum = #{unum}
 	</update>
-	
+
+	<delete id="deleteProduct">
+		delete from Auct_Master where anum = #{anum}
+	</delete>
+
+	<update id="updateBidAmt">
+		update Auct_Master
+		set start_amt = #{bidAmt}, join_cnt = join_cnt + 1
+		where anum = #{anum} and start_amt = #{expectedAmt}
+	</update>
+
 </mapper>

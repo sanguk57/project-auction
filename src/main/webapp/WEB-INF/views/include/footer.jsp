@@ -6,73 +6,43 @@
 	<footer id="footer" class="footer">
 		<div class="container">
 			<div class="row gy-4">
-				<div class="col-lg-5 col-md-12 footer-info">
-					<a href="index" class="logo d-flex align-items-center"> <span>Logis</span>
+				<div class="col-lg-6 col-md-12 footer-info">
+					<a href="/web/aucts/index" class="logo d-flex align-items-center"> <span>MyAuct</span>
 					</a>
-					<p>Cras fermentum odio eu feugiat lide par naso tierra. Justo
-						eget nada terra videa magna derita valies darta donna mare
-						fermentum iaculis eu non diam phasellus.</p>
-					<div class="social-links d-flex mt-4">
-						<a href="#" class="twitter"><i class="bi bi-twitter"></i></a> <a
-							href="#" class="facebook"><i class="bi bi-facebook"></i></a> <a
-							href="#" class="instagram"><i class="bi bi-instagram"></i></a> <a
-							href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
-					</div>
+					<p>안 쓰는 물건은 경매로 팔고, 필요한 물건은 원하는 가격에 입찰하는 중고 경매 사이트입니다.</p>
 				</div>
 
-				<div class="col-lg-2 col-6 footer-links">
-					<h4>Useful Links</h4>
+				<div class="col-lg-3 col-6 footer-links">
+					<h4>바로가기</h4>
 					<ul>
-						<li><a href="#">Home</a></li>
-						<li><a href="#">About us</a></li>
-						<li><a href="#">Services</a></li>
-						<li><a href="#">Terms of service</a></li>
-						<li><a href="#">Privacy policy</a></li>
+						<li><a href="/web/aucts/index">홈</a></li>
+						<li><a href="/web/aucts/about">전체 경매</a></li>
+						<li><a href="/web/aucts/productEnrollment">상품 등록</a></li>
 					</ul>
 				</div>
 
-				<div class="col-lg-2 col-6 footer-links">
-					<h4>Our Services</h4>
+				<div class="col-lg-3 col-6 footer-links">
+					<h4>회원</h4>
 					<ul>
-						<li><a href="#">Web Design</a></li>
-						<li><a href="#">Web Development</a></li>
-						<li><a href="#">Product Management</a></li>
-						<li><a href="#">Marketing</a></li>
-						<li><a href="#">Graphic Design</a></li>
+						<li><a href="/web/users/login">로그인</a></li>
+						<li><a href="/web/users/agree">회원가입</a></li>
+						<li><a href="/web/aucts/index?key=B">관심 상품</a></li>
 					</ul>
 				</div>
-
-				<div
-					class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
-					<h4>Contact Us</h4>
-					<p>
-						A108 Adam Street <br> New York, NY 535022<br> United
-						States <br>
-						<br> <strong>Phone:</strong> +1 5589 55488 55<br> <strong>Email:</strong>
-						info@example.com<br>
-					</p>
-
-				</div>
-
 			</div>
 		</div>
 
 		<div class="container mt-4">
 			<div class="copyright">
-				&copy; Copyright <strong><span>Logis</span></strong>. All Rights
-				Reserved
+				&copy; <strong><span>MyAuct</span></strong> 개인 포트폴리오 프로젝트
 			</div>
 			<div class="credits">
-				<!-- All the links in the footer should remain intact. -->
-				<!-- You can delete the links only if you purchased the pro version. -->
-				<!-- Licensing information: https://bootstrapmade.com/license/ -->
-				<!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/logis-bootstrap-logistics-website-template/ -->
+				<!-- 무료 템플릿(Logis) 라이선스 조건: 이 출처 링크는 지우면 안 됨 (https://bootstrapmade.com/license/) -->
 				Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
 			</div>
 		</div>
 
 	</footer>
-	<!-- End Footer -->
 	<!-- End Footer -->
 
 	<a href="#"
@@ -87,10 +57,10 @@
 	<script src="/web/vendor/glightbox/js/glightbox.min.js"></script>
 	<script src="/web/vendor/swiper/swiper-bundle.min.js"></script>
 	<script src="/web/vendor/aos/aos.js"></script>
-	<script src="/web/vendor/php-email-form/validate.js"></script>
   	<script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
 	<!-- Template Main JS File -->
 	<script src="/web/js/jquery.datetimepicker.full.min.js"></script>
 	<script src="/web/js/main.js?v=<%=System.currentTimeMillis() %>" defer="defer"></script>
+	<script src="/web/js/autocomplete.js?v=<%=System.currentTimeMillis() %>"></script>
 </body>
 </html>

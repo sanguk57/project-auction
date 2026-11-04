@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-	<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+	<%@ taglib uri="jakarta.tags.core" prefix="c"%>
 	<c:set var="path" value="${pageContext.request.contextPath}"/>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,101 +10,43 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="">
-<meta name="author"
-	content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
-<meta name="generator" content="Hugo 0.104.2">
-<title>Login Page</title>
+<title>로그인 - MyAuct</title>
 
-<link rel="canonical"
-	href="https://getbootstrap.com/docs/5.2/examples/sign-in/">
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
 	rel="stylesheet"
 	integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
 	crossorigin="anonymous">
-<style>
-img {
-	width: 40px;
-	height: 40px;
-	border: 1px solid black;
-}
-
-ul, ol {
-	margin: 0;
-	padding: 0;
-	list-style: none;
-	margin-left: 5px;
-	margin-right: 5px;
-}
-
-a {
-	text-decoration: none;
-}
-
-.test {
-	border: 0px solid black;
-	margin-top: 200px;
-}
-</style>
+<%@ include file="/WEB-INF/views/include/authHead.jsp"%>
 </head>
 
-<body class="text-center">
-	<div class="container test">
-		<main class="form-signin w-25 m-auto ">
+<body class="ma-auth">
+	<div class="ma-auth-wrap">
+		<a class="ma-auth-logo" href="/web/aucts/index"><i class="bi bi-hammer"></i>MyAuct</a>
+		<p class="ma-auth-sub">로그인하고 경매에 참여하세요</p>
+		<main class="ma-auth-card">
 			<form>
-				<h1 class="h3 mb-3 fw-normal title">Auct_Login</h1>
-				<div class="form-floating mt-3">
-					<input type="text" class="form-control mt-3 id" id="floatingInput"
-						placeholder="Id"> <label for="floatingInput">Id</label>
+				<div class="form-floating mb-3">
+					<input type="text" class="form-control id" id="floatingInput" placeholder="아이디" autocomplete="username">
+					<label for="floatingInput">아이디</label>
 				</div>
-				<div class="form-floating mt-3">
-					<input type="password" class="form-control pw"
-						id="floatingPassword" placeholder="Password"> <label
-						for="floatingPassword">Password</label>
+				<div class="form-floating mb-2">
+					<input type="password" class="form-control pw" id="floatingPassword" placeholder="비밀번호" autocomplete="current-password">
+					<label for="floatingPassword">비밀번호</label>
 				</div>
-				<div class="d-flex justify-content-end">
-					<div class="form-check mx-3">
-						<input class="form-check-input id_ck" type="checkbox" value=""
-							id="flexCheckChecked"> <label class="form-check-label"
-							for="flexCheckChecked"> 아이디 기억하기 </label>
-					</div>
+				<div class="form-check my-3">
+					<input class="form-check-input id_ck" type="checkbox" value="" id="flexCheckChecked">
+					<label class="form-check-label small" for="flexCheckChecked">아이디 기억하기</label>
 				</div>
-				<div class="d-flex justify-content-between">
-					<div class="fw-lighter">
-
-						<a href="javascript:popupId()" class="link_look"
-							data-clk="log_off.searchid">아이디 찾기</a>&nbsp; <a
-							href="javascript:popupPw()" class="link_look"
-							data-clk="log_off.searchpass">비밀번호 찾기</a>
-					</div>
-					<div>
-						<a href="${path}/users/agree">회원가입</a>
-					</div>
+				<button class="w-100 btn btn-lg btn-primary btn_sm" type="submit">로그인</button>
+				<div class="ma-auth-links mb-0">
+					<span><a href="javascript:popupId()">아이디 찾기</a> · <a href="javascript:popupPw()">비밀번호 찾기</a></span>
+					<a href="${path}/users/agree" class="fw-semibold" style="color: var(--ma-primary)">회원가입</a>
 				</div>
-
-				<div class="row">
-					<div class="col-12">
-						<button
-							class="w-100 h-100 btn btn-lg btn-primary mt-1 btn_sm m-0 p-0"
-							type="submit">로그인</button>
-					</div>
-
-				</div>
-			<%-- 	<ul class="d-flex justify-content-evenly mt-3">
-					<li><a href="#" class="api-btn"><img
-							src="${path}/images/kakao-talk.png"></a></li>
-					<li><a href="#"><img src="${path}/images/naver.png" alt=""></a></li>
-					<li><a href="#"><img src="${path}/images/google.png" alt=""></a></li>
-					<li><a href="#"><img src="${path}/images/facebook.png" alt=""></a></li>
-					<li><a href="#"><img src="${path}/images/twitter.png" alt=""></a></li>
-				</ul> --%>
-				<p class="mt-3 mb-3 text-muted">&copy; 2017 & 2022</p>
 			</form>
 		</main>
+		<p class="text-center small text-muted mt-4"><a href="/web/aucts/index" class="text-muted">← 경매 둘러보기</a></p>
 	</div>
-
-
-
 	<script src="https://code.jquery.com/jquery-3.6.1.js"
 		integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI="
 		crossorigin="anonymous"></script>

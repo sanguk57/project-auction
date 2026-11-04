@@ -1,7 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib uri="jakarta.tags.core" prefix="c"%>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <c:set var="path" value="${pageContext.request.contextPath}" />
 <!DOCTYPE html>
 <html lang="en">
@@ -10,20 +11,16 @@
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-<title>Logis Bootstrap Template - Index</title>
-<meta content="" name="description">
+<title>MyAuct - 중고 경매</title>
+<meta content="중고 물품 경매 사이트" name="description">
 <meta content="" name="keywords">
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <!-- Favicons -->
 <link href="/web/images/favicon.png" rel="icon">
 <link href="/web/images/apple-touch-icon.png" rel="apple-touch-icon">
 
-<!-- Google Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link
-	href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600;1,700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
-	rel="stylesheet">
+<!-- 글꼴: Pretendard (한글 UI 용 무료 글꼴, SIL OFL) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 
 <!-- Vendor CSS Files -->
 <link href="/web/vendor/bootstrap/css/bootstrap.min.css"
@@ -39,6 +36,7 @@
 
 <!-- Template Main CSS File -->
 <link href="/web/css/main.css?v=<%=System.currentTimeMillis() %>" rel="stylesheet">
+<link href="/web/css/myauct.css?v=<%=System.currentTimeMillis() %>" rel="stylesheet">
 
 <link href="/web/css/jquery.datetimepicker.min.css?v=<%=System.currentTimeMillis() %>" rel="stylesheet">
 <!-- =======================================================

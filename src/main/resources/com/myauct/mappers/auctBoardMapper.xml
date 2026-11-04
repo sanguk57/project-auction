@@ -2,22 +2,32 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper
-	namespace="com.myauct.web.domain.auctboard.dao.AuctBoardDAO">
+<mapper namespace="com.myauct.web.domain.auctboard.dao.AuctBoardDAO">
+
 	<insert id="createBoard">
-	insert into Auct_Board (unum, anum, subject, contents) values (#{unum}, #{anum}, #{subject}, #{contents})
+		insert into Auct_Board (unum, anum, subject, contents)
+		values (#{unum}, #{anum}, #{subject}, #{contents})
 	</insert>
-	
+
+	<!--
+		예전: "select * from Auct_Board" → 모든 상품의 댓글이 모든 상품 상세화면에 나왔음
+		      + 댓글마다 이름/답글수를 따로 조회 (댓글 N개면 쿼리 2N번)
+		지금: 이 상품 댓글만, 이름/답글수까지 쿼리 한 번에
+	-->
 	<select id="boardList" resultType="AuctBoardDTO">
-		select * from Auct_Board
+		select B.*, U.name,
+			(select count(*) from Auct_Board_Memo M where M.qnum = B.qnum) as memo_cnt
+		from Auct_Board B
+		left join User_List U on B.unum = U.unum
+		where B.anum = #{anum}
+		order by B.qnum desc
 	</select>
-	
-	<select id="getBoardTotal" resultType="_int">
-		select count(*) from Auct_Board
-	</select> 
-	
+
 	<select id="userBoardCnt" resultType="_int">
 		select count(*) from Auct_Board where unum = #{unum}
 	</select>
-	
-	</mapper>
+
+	<select id="existsBoard" resultType="integer">
+		select count(*) from Auct_Board where qnum = #{qnum}
+	</select>
+</mapper>

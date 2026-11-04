@@ -11,7 +11,7 @@ $(function(){
         data : JSON.stringify(user),
       	success: function(data, textStatus){
           console.log(data, textStatus);
-          location.href = "/web/users/getIdFind?user_id=" + data;
+          location.href = "/web/users/getIdFind?user_id=" + encodeURIComponent(data);
         },
         error: function(data, textStatus){
          console.log(data.responseText, textStatus)

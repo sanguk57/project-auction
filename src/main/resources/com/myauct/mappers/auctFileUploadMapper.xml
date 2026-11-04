@@ -2,31 +2,29 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper
-	namespace="com.myauct.web.domain.auctmaster.dao.AuctFileUploadDAO">
+<mapper namespace="com.myauct.web.domain.auctmaster.dao.AuctFileUploadDAO">
 
-	<select id="fileList"
-		resultType="AuctFileUploadDTO">
+	<!--
+		삭제한 쿼리
+		 - modifyFile : WHERE 절이 없어서 실행하면 모든 상품의 이미지 정보가 한 번에 바뀌었음
+		 - getUploadFile : 파라미터(fnum)와 쿼리(#{anum})가 맞지 않았고 사용하는 곳도 없었음
+	-->
+
+	<select id="fileList" resultType="AuctFileUploadDTO">
 		select * from `Auct_FileUpload` where anum = #{anum}
 	</select>
 
-	<insert id="fileUpload">
-		insert into Auct_FileUpload (anum, upload_path,
-		file_name, file_dname, file_ext)
-		values (#{anum}, #{upload_path},
-		#{file_name}, #{file_dname}, #{file_ext})
-	</insert>
-
-	<select id="getUploadFile"
-		resultType="AuctFileUploadDTO">
-		select * from Auct_FileUpload where anum = #{anum}
+	<select id="fileListByAnums" resultType="AuctFileUploadDTO">
+		select * from `Auct_FileUpload`
+		where anum in
+		<foreach collection="anums" item="anum" open="(" separator="," close=")">#{anum}</foreach>
 	</select>
 
-	<update id="modifyFile">
-		update Auct_FileUpload set upload_path =
-		#{upload_path}, file_name = #{file_name}, file_dname = #{file_dname}
-	</update>
-	
+	<insert id="fileUpload">
+		insert into Auct_FileUpload (anum, upload_path, file_name, file_dname, file_ext)
+		values (#{anum}, #{upload_path}, #{file_name}, #{file_dname}, #{file_ext})
+	</insert>
+
 	<delete id="deleteFile">
 		delete from Auct_FileUpload where anum = #{anum}
 	</delete>

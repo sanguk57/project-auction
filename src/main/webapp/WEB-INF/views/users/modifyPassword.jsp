@@ -8,14 +8,15 @@
     <link rel="canonical" href="https://getbootstrap.com/docs/5.2/examples/sign-in/">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
       integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
-  </head>
+  <%@ include file="/WEB-INF/views/include/authHead.jsp"%>
+</head>
 
-  <body class="text-center">
-    <div class="container test">
-      <main class="form-signin w-50 m-auto ">
-        <form>
-          <input type="hidden" value=${param.unum} id="unum">
-          <h1 class="h3 mb-3 fw-normal title">비밀번호 수정</h1>
+  <body class="ma-auth">
+    <div class="ma-auth-wrap">
+      <a class="ma-auth-logo" href="/web/aucts/index"><i class="bi bi-hammer"></i>MyAuct</a>
+      <p class="ma-auth-sub">새로 사용할 비밀번호를 입력하세요.<br>영문, 숫자, 특수문자를 포함해 8자 이상</p>
+      <main class="ma-auth-card">
+        <form onsubmit="return false">
           <div class="form-floating mt-3">
             <input type="password" class="form-control mt-3" placeholder="영문(대, 소), 특수문자, 숫자 1개 이상포함 8자리이상" id="pw" name="password"> <label
               for="floatingInput">비밀번호</label>
@@ -27,7 +28,7 @@
               <p class="invalid-feedback pwrs_ck"></p>
           </div>
           <div class="form-floating mt-3">
-            <button class="btn btn-sm btn-primary w-100" type="button" id="modifyPassword">비밀번호 수정</button>
+            <button class="btn btn-lg btn-primary w-100" type="button" id="modifyPassword">비밀번호 수정</button>
           </div>
         </form>
       </main>
@@ -92,7 +93,7 @@
         });
   
         $('#modifyPassword').click(function () {
-        	var user = {unum: $('#unum').val(), password: $('#pw').val()}
+        	var user = {password: $('#pw').val()}
           $.ajax({
             url: "/web/rest/modifyPassword",
             type: "PUT",

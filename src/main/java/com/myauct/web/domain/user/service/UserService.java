@@ -1,29 +1,22 @@
 package com.myauct.web.domain.user.service;
 
-import java.util.List;
-
-import org.apache.ibatis.annotations.Param;
-
 import com.myauct.web.domain.user.dto.UserDTO;
 
 public interface UserService {
-	List<UserDTO> getUserList();
 
-	UserDTO getUser (String user_id);
+	/** 아이디/비밀번호가 맞으면 회원정보(비밀번호 제외), 틀리면 null */
+	UserDTO login(String user_id, String rawPassword);
 
-	Integer userRegister(UserDTO dto);
-	
-	Integer userIdChk(String user_id);
+	/** 회원가입 (비밀번호는 암호화해서 저장). 이미 있는 아이디면 BusinessException */
+	void userRegister(UserDTO dto);
 
-	Integer userPwChk (String password);
+	boolean existsUserId(String user_id);
 
-	Integer userChk(@Param("user_id") String user_id, @Param("password") String password);
-	
-	String getUserId(@Param("name") String name, @Param("phone") String phone);
-	
-	Integer getUnum( @Param("user_id") String Id, @Param("phone") String phone);
-	
-	Integer modifyUserPw( @Param("password")String password, @Param("unum")int unum);
-	
+	String getUserId(String name, String phone);
+
+	Integer getUnum(String userId, String phone);
+
+	boolean modifyUserPw(String rawPassword, int unum);
+
 	String getName(int unum);
 }

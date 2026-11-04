@@ -9,7 +9,7 @@ import lombok.ToString;
 @ToString
 public class AuctMasterJoinDTO {
     private int jnum, unum, anum, amount, volume;
-    private char join_gb, cancel_chk;
+    private String join_gb, cancel_chk;
     private Date join_created;
 	
 }

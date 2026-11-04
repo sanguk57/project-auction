@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
-	xmlns:mvc="http://www.springframework.org/schema/mvc"
 	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
 	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:aop="http://www.springframework.org/schema/aop"
-	xmlns:util="http://www.springframework.org/schema/util"
-	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.3.xsd
-		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
-		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring.xsd
 		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
-		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
-		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
-	
-	<!-- Root Context: defines shared resources visible to all other web components -->
-	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"></property>
-		<property name="url" value="jdbc:log4jdbc:mysql://localhost:3306/kuk2028?useSSL=false&amp;serverTimezone=UTC">
-		</property>
-		<property name="username" value="kuk2028"></property>
-		<property name="password" value="khg101611!"></property>
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<!-- DB 접속정보 등은 깃에 올라가지 않는 app.properties 에서 읽어온다 -->
+	<context:property-placeholder location="classpath:config/app.properties" />
+
+	<!-- 커넥션 풀 (DriverManagerDataSource 는 요청마다 커넥션을 새로 만들어서 느림) -->
+	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+		<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy" />
+		<property name="jdbcUrl" value="${db.url}" />
+		<property name="username" value="${db.username}" />
+		<property name="password" value="${db.password}" />
+		<property name="maximumPoolSize" value="10" />
 	</bean>
-	
+
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-		<property name="dataSource" ref="dataSource"></property>
-		<property name="configLocation" value="classpath:/config/mybatisAlias.xml"/>
-	 	<property name="mapperLocations" value="classpath:com/myauct/mappers/**/*.xml"/> 
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:/config/mybatisAlias.xml" />
+		<property name="mapperLocations" value="classpath:com/myauct/mappers/**/*.xml" />
 	</bean>
 
-	<mybatis-spring:scan base-package="com.myauct.web.domain.user.dao"/>
-	<mybatis-spring:scan base-package="com.myauct.web.domain.auctmaster.dao"/>
-	<mybatis-spring:scan base-package="com.myauct.web.domain.auctboard.dao"/>
-	<mybatis-spring:scan base-package="com.myauct.web.domain.auctcategory.dao"/>
-	<mybatis-spring:scan base-package="com.myauct.web.domain.auctconcern.dao"/>
+	<!-- @Transactional 사용 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<tx:annotation-driven transaction-manager="transactionManager" />
 
-	<context:component-scan base-package="com.myauct.web.domain.user.service"/>
-	<context:component-scan base-package="com.myauct.web.domain.auctmaster.service"/>
-	<context:component-scan base-package="com.myauct.web.domain.auctcategory.service"/>
-	<context:component-scan base-package="com.myauct.web.domain.auctboard.service"/>
-	<context:component-scan base-package="com.myauct.web.domain.auctconcern.service"/>
-	
+	<mybatis-spring:scan base-package="com.myauct.web.domain.**.dao" />
+
+	<!-- 서비스 등 컨트롤러가 아닌 빈은 루트 컨텍스트에서만 생성 -->
+	<context:component-scan base-package="com.myauct.web">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+		<context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController" />
+		<context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice" />
+	</context:component-scan>
+
 </beans>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- 날짜별 로그 파일 (톰캣 실행 폴더 기준 logs/ 아래) -->
+	<appender name="rollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>logs/myauct.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>logs/myauct.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d %5level [%logger] %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="com.myauct.web" level="INFO" />
+	<logger name="org.springframework" level="INFO" />
+
+	<!-- log4jdbc: 실행 SQL 만 보기 -->
+	<logger name="jdbc.sqlonly" level="INFO" />
+	<logger name="jdbc.sqltiming" level="WARN" />
+	<logger name="jdbc.audit" level="WARN" />
+	<logger name="jdbc.resultset" level="WARN" />
+	<logger name="jdbc.resultsettable" level="WARN" />
+	<logger name="jdbc.connection" level="WARN" />
+
+	<root level="WARN">
+		<appender-ref ref="console" />
+		<appender-ref ref="rollingFile" />
+	</root>
+</configuration>

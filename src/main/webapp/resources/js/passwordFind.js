@@ -11,7 +11,7 @@ $(function(){
         data : JSON.stringify(user),
       	success: function(data, textStatus){
           console.log(data, textStatus);
-          location.href = "/web/users/modifyPassword?unum=" + data;
+          location.href = "/web/users/modifyPassword";
         },
         error: function(data, textStatus){
          console.log(data.responseText, textStatus)

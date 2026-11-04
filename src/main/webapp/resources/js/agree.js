@@ -61,9 +61,3 @@ ok_chk.addEventListener("click", (e)=>{
     checkedOk(e)
 })
 
-
-const w = screen.width
-const h = screen.height
-const container = document.querySelector(".container")
-container.style.width= w+"px"
-container.style.height= h+"px"

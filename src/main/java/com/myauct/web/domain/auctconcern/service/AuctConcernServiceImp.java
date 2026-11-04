@@ -1,6 +1,7 @@
 package com.myauct.web.domain.auctconcern.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -11,27 +12,30 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class AuctConcernServiceImp implements AuctConcernService{
-	final private AuctConcernDAO auctConcernDAO;
+public class AuctConcernServiceImp implements AuctConcernService {
+
+	private final AuctConcernDAO auctConcernDAO;
+
 	@Override
-	public Integer createConcnern(AuctConcernDTO auctConcernDTO) {
-		return auctConcernDAO.createConcnern(auctConcernDTO);
+	public void addConcern(int anum, int unum) {
+		Integer exists = auctConcernDAO.existsConcern(anum, unum);
+		if (exists == null || exists == 0) {
+			auctConcernDAO.createConcern(anum, unum);
+		}
 	}
 
 	@Override
-	public Integer deleteConcnern(int anum, int unum) {
-		return auctConcernDAO.deleteConcnern(anum, unum);
+	public void removeConcern(int anum, int unum) {
+		auctConcernDAO.deleteConcern(anum, unum);
 	}
 
 	@Override
-	public List<AuctConcernDTO> concernList(int unum) {
-		return auctConcernDAO.concernList(unum);
+	public List<Integer> concernAnumList(int unum) {
+		return auctConcernDAO.concernList(unum).stream().map(AuctConcernDTO::getAnum).collect(Collectors.toList());
 	}
 
 	@Override
-	public Integer concernCnt(int unum) {
+	public int concernCnt(int unum) {
 		return auctConcernDAO.concernCnt(unum);
 	}
-	
-    
 }
