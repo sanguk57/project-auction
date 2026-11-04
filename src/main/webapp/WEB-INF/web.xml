@@ -28,6 +28,8 @@
 			</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
+		<!-- 상세 화면 실시간 갱신(SseEmitter)에 필요 -->
+		<async-supported>true</async-supported>
 
 		<multipart-config>
 			<!-- location 생략 → 톰캣 임시폴더 사용 (특정 PC 경로 하드코딩 제거) -->
@@ -53,6 +55,7 @@
 		<filter-class>
 			org.springframework.web.filter.CharacterEncodingFilter
 		</filter-class>
+		<async-supported>true</async-supported>
 
 		<init-param>
 			<param-name>encoding</param-name>
@@ -67,6 +70,17 @@
 
 	<filter-mapping>
 		<filter-name>encodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<!-- CSRF 방어: POST · PUT · DELETE 요청에 세션 토큰이 있는지 확인 (com.myauct.web.global.CsrfFilter) -->
+	<filter>
+		<filter-name>csrfFilter</filter-name>
+		<filter-class>com.myauct.web.global.CsrfFilter</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	<filter-mapping>
+		<filter-name>csrfFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 

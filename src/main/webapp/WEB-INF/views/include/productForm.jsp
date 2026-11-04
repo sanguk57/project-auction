@@ -3,7 +3,7 @@
 	상품 등록 / 수정 공통 폼 (productEnrollment.jsp, modifyProduct.jsp 에서 include)
 	  aDTO 가 있으면 수정, 없으면 등록
 	  categoryList   : 카테고리 목록 (컨트롤러에서 전달)
-	  uploadFileList : (수정) 현재 사진 경로 목록
+	  photoList      : (수정) 현재 사진 목록 (대표 지정 · 삭제)
 	동작은 /web/js/productForm.js
 --%>
 <c:set var="isEdit" value="${not empty aDTO}" />
@@ -76,11 +76,15 @@
 			<!-- 2. 사진 -->
 			<section class="ma-fcard">
 				<h3 class="ma-ftitle"><span class="step">2</span>사진</h3>
-				<c:if test="${isEdit && not empty uploadFileList}">
-					<p class="ma-fhint">현재 사진 · 새 사진을 선택하면 <b>모두 새 사진으로 교체</b>됩니다.</p>
-					<div class="ma-photos current mb-3">
-						<c:forEach var="img" items="${uploadFileList}">
-							<div class="ph"><img src="/web/upload/${fn:escapeXml(img)}" alt=""></div>
+				<c:if test="${isEdit && not empty photoList}">
+					<p class="ma-fhint">현재 사진 · <b>대표</b>를 누르면 목록에 보일 사진이 바뀌고, <b>삭제</b>를 누르면 저장할 때 지워집니다. 새로 고른 사진은 뒤에 추가됩니다.</p>
+					<div class="ma-photos current mb-3" id="currentPhotos">
+						<c:forEach var="ph" items="${photoList}" varStatus="st">
+							<div class="ph" data-fnum="${ph.fnum}">
+								<img src="/web/upload/${fn:escapeXml(ph.url)}" alt="">
+								<label class="ph-main"><input type="radio" name="mainPhoto" value="${ph.fnum}" ${st.first ? 'checked' : ''}> 대표</label>
+								<label class="ph-del"><input type="checkbox" name="deletePhoto" value="${ph.fnum}"> <i class="bi bi-trash"></i></label>
+							</div>
 						</c:forEach>
 					</div>
 				</c:if>
@@ -225,7 +229,7 @@
 				<article class="auct-card">
 					<div class="auct-thumb" id="pvThumb">
 						<c:choose>
-							<c:when test="${isEdit && not empty uploadFileList}"><img src="/web/upload/${fn:escapeXml(uploadFileList[0])}" alt=""></c:when>
+							<c:when test="${isEdit && not empty photoList}"><img src="/web/upload/${fn:escapeXml(photoList[0].thumbUrl)}" alt=""></c:when>
 							<c:otherwise><div class="auct-thumb-empty"><i class="bi bi-image"></i>사진 없음</div></c:otherwise>
 						</c:choose>
 						<span class="auct-badge auct-badge-live" id="pvBadge">진행 중</span>

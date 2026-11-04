@@ -509,3 +509,84 @@ body.ma-auth.wide > .container, body.ma-auth.wide .ma-auth-wrap { max-width: 640
 .ma-rules li::before { content: "\f26b"; font-family: "bootstrap-icons"; margin-right: 4px; opacity: .5; }
 .ma-rules li.ok { color: #059669; }
 .ma-rules li.ok::before { content: "\f26a"; opacity: 1; } /* bi-check-circle-fill */
+
+/* ---------- 경매 결과 · 실시간 (상세 화면) ---------- */
+.ma-result { display: flex; gap: 14px; align-items: center; padding: 16px 18px; border-radius: var(--ma-radius-sm); margin-bottom: 16px;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5); color: #9a3412; }
+.ma-result i { font-size: 30px; }
+.ma-result b { display: block; font-size: 18px; color: #7c2d12; }
+.ma-result span { font-size: 14px; }
+.ma-result.unsold { background: #f1f5f9; color: var(--ma-muted); }
+.ma-result.unsold b { color: var(--ma-navy-2); }
+.ma-contact { border: 1px solid var(--ma-line); border-radius: var(--ma-radius-sm); padding: 14px 16px; margin-bottom: 16px; display: grid; gap: 6px; font-size: 15px; }
+.ma-contact .t { font-weight: 800; color: var(--ma-navy); }
+.ma-contact .t small { font-weight: 500; color: var(--ma-muted); margin-left: 6px; font-size: 12px; }
+.ma-contact i { color: var(--ma-primary); margin-right: 8px; }
+.ma-live { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; font-size: 11px; font-weight: 700; color: #dc2626; }
+.ma-live i { width: 7px; height: 7px; border-radius: 50%; background: #ef4444; animation: ma-pulse 1.4s infinite; }
+#priceNow.flash { animation: ma-flash 1.2s ease; }
+@keyframes ma-flash { 0% { color: var(--ma-primary); transform: scale(1.04); } 100% { color: var(--ma-navy); transform: none; } }
+.ma-top-notice { padding: 10px 14px; border-radius: var(--ma-radius-sm); background: #ecfdf5; color: #047857; font-weight: 600; margin-bottom: 14px; font-size: 14px; }
+.btn-buynow { width: 100%; margin-top: 14px; padding: 13px; font-size: 16px; color: #fff; background: linear-gradient(135deg, #f97316, #ea580c); border: 0; }
+.btn-buynow:hover { color: #fff; filter: brightness(1.05); }
+.ma-toast {
+  position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 20px); opacity: 0; z-index: 2000;
+  background: var(--ma-navy); color: #fff; padding: 12px 20px; border-radius: 12px; box-shadow: var(--ma-shadow-hover);
+  font-weight: 600; font-size: 15px; transition: opacity .25s, transform .25s; max-width: calc(100% - 32px);
+}
+.ma-toast.show { opacity: 1; transform: translate(-50%, 0); }
+.ma-toast.warn { background: #b45309; }
+.ma-toast.end { background: #7c2d12; }
+
+/* ---------- 목록 필터 (상태 · 카테고리 · 정렬) ---------- */
+.ma-filters { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin: -6px 0 22px; }
+.ma-tabs { display: inline-flex; background: #e9edf5; border-radius: 999px; padding: 4px; gap: 2px; }
+.ma-tabs button { border: 0; background: none; padding: 7px 16px; border-radius: 999px; font-weight: 600; font-size: 14px; color: var(--ma-muted); }
+.ma-tabs button.on { background: #fff; color: var(--ma-navy); box-shadow: 0 1px 3px rgba(15, 23, 42, .12); }
+.ma-filter-right { display: flex; gap: 8px; }
+.ma-filter-right .form-select { width: auto; padding-top: .45rem; padding-bottom: .45rem; padding-right: 2.4rem; font-size: 14px; }
+
+/* ---------- 마이페이지 ---------- */
+.ma-mytabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.ma-mytabs a { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 12px; background: #fff;
+  box-shadow: var(--ma-shadow); color: var(--ma-navy-2); font-weight: 600; text-decoration: none; font-size: 15px; }
+.ma-mytabs a b { background: #f1f5f9; border-radius: 999px; padding: 0 8px; font-size: 13px; }
+.ma-mytabs a.on { background: var(--ma-primary); color: #fff; }
+.ma-mytabs a.on b { background: rgba(255, 255, 255, .25); }
+.ma-mylist { background: #fff; border-radius: var(--ma-radius); box-shadow: var(--ma-shadow); overflow: hidden; }
+.ma-mylist .row-item { display: grid; grid-template-columns: 64px 1fr auto auto; gap: 16px; align-items: center; padding: 14px 18px;
+  border-top: 1px solid #f1f5f9; color: inherit; text-decoration: none; }
+.ma-mylist .row-item:first-child { border-top: 0; }
+.ma-mylist a.row-item:hover { background: #f8fafc; }
+.ma-mylist .thumb { width: 64px; height: 64px; border-radius: 10px; overflow: hidden; background: #eef1f6; display: flex; align-items: center; justify-content: center; color: #a3adbf; font-size: 22px; }
+.ma-mylist .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.ma-mylist .info { min-width: 0; display: grid; gap: 4px; }
+.ma-mylist .info b { color: var(--ma-navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ma-mylist .info a { color: inherit; text-decoration: none; }
+.ma-mylist .info small { color: var(--ma-muted); font-size: 13px; }
+.ma-mylist .info small a { color: var(--ma-primary); }
+.ma-mylist .price { text-align: right; font-weight: 800; color: var(--ma-navy); white-space: nowrap; }
+.ma-mylist .price small { display: block; font-weight: 500; font-size: 12px; color: var(--ma-muted); }
+.ma-state { font-size: 12px; font-weight: 800; padding: 5px 10px; border-radius: 999px; white-space: nowrap; background: #f1f5f9; color: var(--ma-muted); }
+.ma-state.won { background: #fff7ed; color: #c2410c; }
+.ma-state.top { background: #ecfdf5; color: #047857; }
+.ma-state.outbid { background: #fef2f2; color: #dc2626; }
+.ma-state.ready { background: #fffbeb; color: #b45309; }
+.ma-danger-zone { border: 1px solid #fecaca; margin-top: 20px; }
+@media (max-width: 575px) {
+  .ma-mylist .row-item { grid-template-columns: 56px 1fr; }
+  .ma-mylist .price, .ma-mylist .ma-state { grid-column: 2; justify-self: start; text-align: left; }
+}
+
+/* ---------- 상품 수정: 현재 사진 대표 지정 · 삭제 ---------- */
+.ma-photos .ph .ph-main, .ma-photos .ph .ph-del {
+  position: absolute; bottom: 6px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;
+  background: rgba(15, 23, 42, .72); color: #fff; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 999px; margin: 0;
+}
+.ma-photos .ph .ph-main { left: 6px; }
+.ma-photos .ph .ph-del { right: 6px; }
+.ma-photos .ph .ph-main input, .ma-photos .ph .ph-del input { margin: 0; }
+.ma-photos .ph:has(input[name=mainPhoto]:checked) { outline: 3px solid var(--ma-primary); outline-offset: -3px; }
+.ma-photos .ph.del img { opacity: .3; filter: grayscale(1); }
+.ma-photos .ph.del .ph-del { background: var(--ma-danger); }
+.ma-photos.current .ph { opacity: 1; }

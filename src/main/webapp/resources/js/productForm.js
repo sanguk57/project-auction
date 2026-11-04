@@ -127,6 +127,28 @@
 		preview();
 	});
 
+	// ---------- (수정) 현재 사진: 대표 지정 · 삭제 표시 ----------
+	const current = $("currentPhotos");
+	if (current) {
+		current.addEventListener("change", (e) => {
+			const ph = e.target.closest(".ph");
+			if (e.target.name === "deletePhoto") {
+				ph.classList.toggle("del", e.target.checked);
+				const main = ph.querySelector('input[name="mainPhoto"]');
+				if (e.target.checked && main.checked) {
+					// 대표 사진을 지우면 남은 사진 중 첫 번째를 대표로
+					const next = [...current.querySelectorAll(".ph:not(.del) input[name=mainPhoto]")][0];
+					if (next) next.checked = true; else main.checked = false;
+				}
+			}
+			const checked = current.querySelector('input[name="mainPhoto"]:checked');
+			const img = $("pvThumb").querySelector("img");
+			if (checked && img && !(fileInput.files && fileInput.files.length)) {
+				img.src = checked.closest(".ph").querySelector("img").src;
+			}
+		});
+	}
+
 	// ---------- 글자 수 ----------
 	const contents = $("contents");
 	const count = () => ($("contentsCount").textContent = won(contents.value.length));

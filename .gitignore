@@ -21,3 +21,7 @@ Thumbs.db
 .idea/
 *.iml
 .vscode/
+
+# VS Code 업그레이드 도구가 만든 빈 폴더
+.github/modernize/
+.env

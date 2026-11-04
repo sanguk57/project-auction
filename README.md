@@ -1,5 +1,7 @@
 ## 📢 경매사이트 프로젝트 (MyAuct)
 
+[![build](https://github.com/sanguk57/project-auction/actions/workflows/build.yml/badge.svg)](https://github.com/sanguk57/project-auction/actions/workflows/build.yml)
+
 중고 물품을 경매로 사고파는 웹 사이트입니다.
 판매자는 사진과 시작가·입찰 단위·경매 기간을 정해 상품을 등록하고, 구매자는 기간 안에 입찰·찜·문의 댓글을 남길 수 있습니다.
 
@@ -12,7 +14,8 @@
       * 주요 라이브러리 : HikariCP (커넥션 풀), Jackson 3 (JSON), Spring Security Crypto (BCrypt), Thumbnailator (썸네일), Logback, Lombok
       * 서버 : Apache Tomcat 11.0
       * DB : MySQL 8.4 / 9.7
-      * 테스트 : JUnit Jupiter 6, Spring Test (MockMvc)
+      * 테스트 : JUnit Jupiter 6, Spring Test (MockMvc), H2 (테스트 전용 메모리 DB)
+      * CI / 배포 : GitHub Actions, Docker Compose
       * 편집툴 : STS, VS Code, Sequel Pro / MySQL Workbench
 
  ### 🙋‍♂️ 세부설명
@@ -23,16 +26,21 @@
   | 구분 | 기능 |
   |---|---|
   | 회원 | 회원가입(약관 동의, 아이디 중복 확인, 주소 검색), 로그인 / 로그아웃, 아이디 찾기, 비밀번호 찾기 · 변경 |
-  | 상품 | 목록 · 검색(상품명 / 카테고리) + **검색어 자동완성**, 페이징, 상세, 등록(이미지 여러 장 + 썸네일 자동 생성), 수정, 삭제 |
-  | 경매 | 입찰(최소 입찰가 = 현재가 + 입찰 단위), 경매 시작 / 마감 카운트다운, 입찰자 수 표시 |
+  | 상품 | 목록 · 검색(상품명 / 카테고리) + **검색어 자동완성**, **상태(진행 중 · 시작 전 · 마감) · 카테고리 필터, 정렬(마감 임박 · 최신 · 가격 · 입찰 많은 순)**, 페이징, 상세, 등록(이미지 여러 장 + 썸네일 자동 생성), 수정(**사진 한 장씩 삭제 · 추가 · 대표 사진 지정**), 삭제 |
+  | 경매 | 입찰(최소 입찰가 = 현재가 + 입찰 단위), **즉시구매**, **실시간 가격 갱신(SSE)**, 경매 시작 / 마감 카운트다운, **마감 시 자동 낙찰 · 유찰 처리** |
+  | 거래 | 낙찰되면 판매자 ↔ 낙찰자에게만 서로의 연락처 공개 |
   | 소통 | 상품 문의 댓글, 댓글의 답글 |
-  | 마이 | 내 등록 상품, 관심(찜) 상품 |
+  | 마이 | **마이페이지** (입찰 내역 · 낙찰 상품 · 판매 현황 · 내 정보 수정 · 비밀번호 변경 · 회원 탈퇴), 내 등록 상품, 관심(찜) 상품 |
 
   **경매 규칙 (서버에서 검사)**
   - 경매 기간(시작 ~ 종료) 안에서만 입찰 가능
   - 본인이 등록한 상품에는 입찰 불가
   - 두 명이 동시에 입찰해도 한 명만 반영 (현재가가 그대로일 때만 갱신하는 조건부 UPDATE)
   - 입찰이 한 건이라도 있으면 판매자도 수정 · 삭제 불가
+  - 즉시구매가 이상으로 입찰하면 즉시구매가로 바로 낙찰
+  - 마감 시각이 지나면 30초마다 도는 스케줄러가 최고 입찰자에게 낙찰(입찰이 없으면 유찰) — 상세 화면을 여는 순간에도 바로 처리
+  - 마감 · 낙찰 처리와 입찰이 동시에 들어와도 한쪽만 반영 (`SELECT … FOR UPDATE` + `end_chk = 'N'` 조건)
+  - 진행 중인 입찰 · 판매가 있으면 회원 탈퇴 불가, 탈퇴하면 개인정보는 지우고 거래 기록만 남김
 
  ### 📁 프로젝트 구조
   ```
@@ -42,8 +50,9 @@
    │   ├─ auctmaster    상품 · 입찰 · 이미지 (AuctMasterController, RestAPIController, FileStorageService)
    │   ├─ auctcategory  카테고리
    │   ├─ auctconcern   관심(찜) 상품
-   │   └─ auctboard     문의 댓글 · 답글
-   └─ global            로그인 검사 인터셉터, 공통 예외 처리, 세션 상수
+   │   ├─ auctboard     문의 댓글 · 답글
+   │   └─ mypage        마이페이지 (입찰 내역 · 낙찰 · 판매 현황 · 내 정보)
+   └─ global            로그인 검사 인터셉터, CSRF 필터, 공통 예외 처리, 세션 상수
   src/main/resources
    ├─ com/myauct/mappers  MyBatis 매퍼 XML
    ├─ config              app-default.properties (비밀이 아닌 기본 설정)
@@ -52,8 +61,12 @@
    ├─ spring              root-context.xml (DB · 서비스), servlet-context.xml (MVC · 컨트롤러)
    └─ views               JSP (aucts: 경매 화면, users: 회원 화면, include: 공통 머리글 · 바닥글)
   sql
-   ├─ schema.sql          테이블 생성
-   └─ sample-data.sql     샘플 데이터
+   ├─ schema.sql          테이블 생성 (다시 실행하면 데이터가 지워짐!)
+   ├─ sample-data.sql     샘플 데이터
+   └─ migrations/         기존 DB 에 새 컬럼만 추가하는 스크립트 (데이터 유지)
+  src/test                테스트 (H2 메모리 DB)
+  .github/workflows       GitHub Actions (push 할 때마다 빌드 + 테스트)
+  Dockerfile, docker-compose.yml, docker/   도커로 MySQL + 톰캣 한 번에 실행
   ```
 
  ### ⚙️ 실행 방법
@@ -76,9 +89,32 @@
   5. **배포** : `web.war` 를 톰캣 `webapps` 에 넣거나, VS Code 의 Community Server Connectors 에서 Add Deployment
   6. **접속** : http://localhost:8080/web/
 
+  **예전에 만든 DB 를 쓰고 있다면** (2026.11 이전 schema.sql 로 만든 경우) 새 기능에 필요한 컬럼을 한 번 추가합니다. 데이터는 그대로 남습니다.
+  ```
+  mysql --default-character-set=utf8mb4 -u kuk2028 -p < sql/migrations/001-auction-end-mypage.sql
+  ```
+
+  **도커로 실행** (MySQL · 톰캣 설치 없이)
+  ```
+  docker compose up -d --build      # http://localhost:8080/web  (처음 뜰 때 schema + 샘플 데이터 자동 생성)
+  docker compose down               # 정지 (DB 까지 지우려면 down -v)
+  ```
+  - 비밀번호 · 주소 검색 키는 `.env.example` 을 `.env` 로 복사해서 입력
+  - 도커 MySQL 은 PC 에 설치된 MySQL 과 겹치지 않게 3307 포트로 열림
+
  ### 🧪 테스트
-  - `mvn test -Dtest=PagingDTOTest,FileStorageServiceTest` : DB 없이 실행되는 단위 테스트
-  - 그 외 테스트(`UserTests`, `RestAPIControllerTest` 등)는 실제 MySQL 연결이 필요하며, 일부는 예전 DB 데이터 기준으로 작성되어 있음
+  - `mvn test` : 전체 43개 테스트. **MySQL 없이** H2 메모리 DB(MySQL 호환 모드)에 `schema.sql` + `sample-data.sql` 을 매번 새로 넣고 실행
+    → 실제 DB(`kuk2028`) 데이터는 건드리지 않음 (설정 : `src/test/resources/test-app.properties`)
+  | 테스트 | 내용 |
+  |---|---|
+  | `AuctionFlowTest` | 입찰 규칙, 동시 입찰, 즉시구매, 마감 → 낙찰 / 유찰, 마감 후 입찰 차단, 실시간 이벤트 |
+  | `ProductListTest` | 상태 · 카테고리 · 검색 필터, 정렬, 개수와 목록 일치, 잘못된 정렬값 차단 |
+  | `PhotoManagementTest` | 사진 삭제 · 추가 · 대표 지정, 다른 상품 사진 삭제 차단 |
+  | `MyPageTest` | 입찰 내역 상태(최고가 / 밀림 / 낙찰 / 패찰), 판매 현황, 탈퇴 조건 |
+  | `UserAccountTest` | 로그인, 평문 → BCrypt 변환, 비밀번호 변경, 내 정보 수정 |
+  | `WebLayerTest` | CSRF 차단, 로그인 · 권한, 연락처 공개 범위, 실시간 연결 |
+  | `PagingDTOTest`, `FileStorageServiceTest` | 페이징 계산, 업로드 파일 검사 |
+  - GitHub 에 push 하면 GitHub Actions 가 같은 테스트를 돌리고 결과를 위 배지로 표시
 
  ---
 
@@ -181,6 +217,23 @@
     키가 없으면 팝업에서 "직접 입력" 안내
   - 주소 검색 팝업이 요청값을 자바스크립트에 그대로 출력하던 XSS 수정
   - 업로드 폴더 기본값을 웹앱 밖 `C:/myauct/upload` 로 변경
+
+ #### 8. 경매 기능 완성 · 운영 기반
+  | # | 항목 | 내용 |
+  |---|---|---|
+  | 1 | 경매 종료 · 낙찰 | `AuctionCloseScheduler` 가 30초마다 마감된 경매를 낙찰(S) / 유찰(U) 처리, 낙찰자 · 낙찰가 · 처리 시각 저장. 상세 화면 · 목록 카드에 결과 표시, 판매자와 낙찰자에게만 상대 연락처 공개 |
+  | 2 | 마이페이지 | `/my` : 입찰 내역(최고가 / 밀림 / 낙찰 / 패찰), 낙찰 상품, 판매 현황, 내 정보 수정, 비밀번호 변경, 회원 탈퇴 |
+  | 3 | 즉시구매 | 상세 화면의 "즉시구매" 버튼 (`POST /product-api/buy_now`), 즉시구매가 이상 입찰 시에도 바로 낙찰(B) |
+  | 4 | 실시간 가격 | `GET /product-api/stream` (Server-Sent Events). 다른 사람이 입찰하면 새로고침 없이 현재가 · 입찰 수 · 최소 입찰가가 바뀌고 알림 표시, 마감 · 낙찰도 바로 반영. 이벤트는 DB 커밋 후에만 전송 |
+  | 5 | 정렬 · 필터 | 상태 탭, 카테고리 · 정렬 선택. 정렬값은 서버에서 허용 목록으로만 받아 SQL 삽입 차단, 페이지를 넘겨도 조건 유지 |
+  | 6 | 사진 관리 | 수정 화면에서 사진마다 삭제 · 대표 지정, 새 사진은 뒤에 추가 (`sort_no`), 목록 썸네일도 대표 사진 |
+  | 7 | CSRF 방어 | `CsrfFilter` : 세션별 토큰을 POST · PUT · DELETE 마다 검사. `js/csrf.js` 가 Ajax 헤더와 폼에 토큰을 자동으로 넣음 (주소 검색 팝업 콜백은 제외) |
+  | 8 | 테스트 DB 분리 | 테스트는 H2 메모리 DB 사용 → 실제 DB 를 지우지 않음, 예전 데이터에 의존하던 테스트를 새로 작성 (43개) |
+  | 9 | GitHub Actions | `.github/workflows/build.yml` : push · PR 마다 JDK 17 로 빌드 + 테스트, 실패 시 테스트 리포트 · 성공 시 WAR 업로드 |
+  | 10 | Docker Compose | `docker compose up` 으로 MySQL 8.4 + Tomcat 11 실행, 처음 뜰 때 테이블 · 샘플 데이터 자동 생성 |
+
+  - DB 변경 : `Auct_Master` 에 `win_unum`, `win_amt`, `end_date` (+ 인덱스), `Auct_FileUpload` 에 `sort_no`, `User_List` 에 `del_yn` 추가
+    (`sql/migrations/001-auction-end-mypage.sql`)
 
  ---
 

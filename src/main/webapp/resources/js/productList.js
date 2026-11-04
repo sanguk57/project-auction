@@ -5,16 +5,18 @@
  */
 (function () {
 	document.addEventListener("DOMContentLoaded", () => {
-		const sel = document.getElementById("cntPerPage");
-		if (sel) {
-			sel.addEventListener("change", () => {
-				// 검색어를 JSP 로 직접 찍으면 스크립트 삽입(XSS) 위험 → 현재 주소의 값을 그대로 사용
-				const params = new URLSearchParams(location.search);
-				params.set("cntPerPage", sel.value);
-				params.set("nowPage", 1);
-				location.href = location.pathname + "?" + params.toString();
-			});
+		// 개수 · 상태 · 카테고리 · 정렬: data-param 이 붙은 select 를 바꾸거나 버튼을 누르면 그 값으로 다시 불러온다
+		// (검색어를 JSP 로 직접 찍으면 스크립트 삽입(XSS) 위험 → 현재 주소의 값을 그대로 사용)
+		function go(name, value) {
+			const params = new URLSearchParams(location.search);
+			params.set(name, value);
+			params.set("nowPage", 1);
+			location.href = location.pathname + "?" + params.toString();
 		}
+		document.querySelectorAll("select[data-param]").forEach((sel) =>
+			sel.addEventListener("change", () => go(sel.dataset.param, sel.value)));
+		document.querySelectorAll("button[data-param]").forEach((btn) =>
+			btn.addEventListener("click", () => go(btn.dataset.param, btn.dataset.value)));
 
 		const grid = document.getElementById("productGrid");
 		if (!grid || grid.dataset.login !== "true") return;

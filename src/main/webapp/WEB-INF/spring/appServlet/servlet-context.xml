@@ -43,6 +43,8 @@
 			<mapping path="/aucts/modifyProduct" />
 			<mapping path="/aucts/productModify" />
 			<mapping path="/aucts/deleteProduct" />
+			<mapping path="/my" />
+			<mapping path="/my/**" />
 			<beans:bean class="com.myauct.web.global.LoginCheckInterceptor" />
 		</interceptor>
 	</interceptors>

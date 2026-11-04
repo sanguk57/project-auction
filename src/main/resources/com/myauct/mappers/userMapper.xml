@@ -14,11 +14,11 @@
 	</select>
 
 	<select id="getUserId" resultType="string">
-		select user_id from User_List where name = #{name} and phone = #{phone} limit 1
+		select user_id from User_List where name = #{name} and phone = #{phone} and del_yn = 'N' limit 1
 	</select>
 
 	<select id="getUnum" resultType="integer">
-		select unum from User_List where user_id = #{user_id} and phone = #{phone}
+		select unum from User_List where user_id = #{user_id} and phone = #{phone} and del_yn = 'N'
 	</select>
 
 	<update id="modifyUserPw">
@@ -26,11 +26,29 @@
 	</update>
 
 	<select id="getUser" resultType="UserDTO">
-		select * from User_List where user_id = #{user_id}
+		select * from User_List where user_id = #{user_id} and del_yn = 'N'
+	</select>
+
+	<select id="getUserByUnum" resultType="UserDTO">
+		select * from User_List where unum = #{unum} and del_yn = 'N'
 	</select>
 
 	<select id="getName" resultType="string">
 		select name from User_List where unum = #{unum}
 	</select>
+
+	<update id="updateProfile">
+		update User_List
+		set name = #{name}, phone = #{phone}, email = #{email}, addr = #{addr}, gender = #{gender}
+		where unum = #{unum} and del_yn = 'N'
+	</update>
+
+	<!-- 아이디는 "deleted_회원번호" 로 바꿔서 원래 아이디를 다른 사람이 다시 쓸 수 있게 한다 -->
+	<update id="withdraw">
+		update User_List
+		set user_id = concat('deleted_', unum), password = '!', name = '탈퇴회원',
+			phone = '', email = null, addr = null, gender = null, del_yn = 'Y'
+		where unum = #{unum} and del_yn = 'N'
+	</update>
 
 </mapper>

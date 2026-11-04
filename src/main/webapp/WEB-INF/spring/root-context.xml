@@ -4,10 +4,12 @@
 	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:task="http://www.springframework.org/schema/task"
 	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring.xsd
 		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
-		http://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx.xsd">
+		http://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/task https://www.springframework.org/schema/task/spring-task.xsd">
 
 	<!--
 		설정: WAR 안 기본값(app-default.properties) 위에 WAR 밖 실제 설정 파일을 덮어쓴다 (뒤에 적은 파일이 우선)
@@ -20,7 +22,7 @@
 
 	<!-- 커넥션 풀 (DriverManagerDataSource 는 요청마다 커넥션을 새로 만들어서 느림) -->
 	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
-		<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy" />
+		<property name="driverClassName" value="${db.driver}" />
 		<property name="jdbcUrl" value="${db.url}" />
 		<property name="username" value="${db.username}" />
 		<property name="password" value="${db.password}" />
@@ -38,6 +40,10 @@
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<!-- @Scheduled 사용: 경매 마감 처리(AuctionCloseScheduler), 실시간 연결 유지 신호(AuctionEventHub) -->
+	<task:scheduler id="auctionScheduler" pool-size="2" />
+	<task:annotation-driven scheduler="auctionScheduler" />
 
 	<mybatis-spring:scan base-package="com.myauct.web.domain.**.dao" />
 

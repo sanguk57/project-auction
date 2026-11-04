@@ -10,6 +10,9 @@
 <head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
+<%-- CSRF 토큰: csrf.js 가 요청 · 폼에 자동으로 붙인다 --%>
+<meta name="csrf-token" content="${_csrf}">
+<script src="/web/js/csrf.js?v=<%=System.currentTimeMillis() %>"></script>
 
 <title>MyAuct - 중고 경매</title>
 <meta content="중고 물품 경매 사이트" name="description">

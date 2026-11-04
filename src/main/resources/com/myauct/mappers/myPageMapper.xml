@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myauct.web.domain.mypage.dao.MyPageDAO">
+
+	<sql id="thumb">
+		(select concat(F.upload_path, '/s_', F.file_name, '_', F.file_dname, F.file_ext)
+		   from Auct_FileUpload F where F.anum = A.anum order by F.sort_no, F.fnum limit 1) as thumb
+	</sql>
+
+	<select id="myBids" resultType="com.myauct.web.domain.mypage.dto.MyAuctionDTO">
+		select A.anum, A.unum, A.prod_title, A.prod_name, A.start_amt, A.join_cnt, A.join_amt, A.limit_type, A.limit_amt,
+			A.auct_start, A.auct_end, A.end_chk, A.win_unum, A.win_amt, A.end_date,
+			J.my_max, J.my_cnt, J.last_bid, <include refid="thumb" />
+		from (
+			select anum, max(volume) as my_max, count(*) as my_cnt, max(join_created) as last_bid
+			from Auct_Master_join
+			where unum = #{unum} and cancel_chk = 'N'
+			group by anum
+		) J
+		inner join Auct_Master A on A.anum = J.anum
+		order by J.last_bid desc
+	</select>
+
+	<select id="myWins" resultType="com.myauct.web.domain.mypage.dto.MyAuctionDTO">
+		select A.*, U.name as other_name, U.phone as other_phone, U.email as other_email, <include refid="thumb" />
+		from Auct_Master A
+		inner join User_List U on U.unum = A.unum
+		where A.win_unum = #{unum}
+		order by A.end_date desc
+	</select>
+
+	<select id="mySales" resultType="com.myauct.web.domain.mypage.dto.MyAuctionDTO">
+		select A.*, W.name as other_name, W.phone as other_phone, W.email as other_email, W.name as win_name,
+			<include refid="thumb" />
+		from Auct_Master A
+		left join User_List W on W.unum = A.win_unum
+		where A.unum = #{unum}
+		order by A.anum desc
+	</select>
+
+	<select id="countOpenSales" resultType="_int">
+		select count(*) from Auct_Master where unum = #{unum} and end_chk = 'N'
+	</select>
+
+	<!-- 최고 입찰 = 그 상품에서 가장 높은 입찰가가 내 것 (입찰가는 계속 오르므로 현재가와 같으면 1등) -->
+	<select id="countLeadingBids" resultType="_int">
+		select count(distinct A.anum)
+		from Auct_Master A
+		inner join Auct_Master_join J on J.anum = A.anum and J.unum = #{unum} and J.cancel_chk = 'N'
+		where A.end_chk = 'N' and J.volume = A.start_amt
+	</select>
+
+	<delete id="deleteConcerns">
+		delete from Auct_Concern where unum = #{unum}
+	</delete>
+</mapper>

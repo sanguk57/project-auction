@@ -1,0 +1,45 @@
+# 실행:  docker compose up -d --build   →  http://localhost:8080/web
+# 정리:  docker compose down            (DB 까지 지우려면 down -v)
+#
+# 처음 뜰 때 MySQL 이 sql/schema.sql → sql/sample-data.sql 을 실행한다 (DB 볼륨이 비어 있을 때만).
+# 비밀번호 · 주소검색 키를 바꾸려면 프로젝트 폴더에 .env 파일을 만든다 (.env.example 참고).
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: kuk2028
+      MYSQL_USER: kuk2028
+      MYSQL_PASSWORD: ${DB_PASSWORD:-myauct1234}
+      TZ: Asia/Seoul
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_0900_ai_ci
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./sql/sample-data.sql:/docker-entrypoint-initdb.d/02-sample-data.sql:ro
+    ports:
+      - "3307:3306"   # PC 에 깔린 MySQL(3306)과 겹치지 않게
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-rootpass}"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  app:
+    build: .
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_PASSWORD: ${DB_PASSWORD:-myauct1234}
+      JUSO_KEY: ${JUSO_KEY:-}
+    volumes:
+      - ./docker/app.properties:/config/app.properties:ro
+      - upload-data:/data/upload
+    # 설정 파일의 ${DB_PASSWORD} 같은 값은 스프링이 환경변수에서 채운다
+    ports:
+      - "8080:8080"
+
+volumes:
+  db-data:
+  upload-data:

@@ -11,7 +11,7 @@
 	<c:when test="${not empty param.value}"><c:set var="listTitle" value="'${param.value}' 검색 결과" /></c:when>
 	<c:otherwise><c:set var="listTitle" value="${listPath == 'about' ? '전체 경매' : '지금 진행 중인 경매'}" /></c:otherwise>
 </c:choose>
-<c:set var="query" value="&cntPerPage=${paging.cntPerPage}&value=${fn:escapeXml(param.value)}&key=${fn:escapeXml(param.key)}" />
+<c:set var="query" value="&cntPerPage=${paging.cntPerPage}&value=${fn:escapeXml(param.value)}&key=${fn:escapeXml(param.key)}&sort=${paging.sort}&status=${paging.status}&cnum=${paging.cnum}" />
 
 <div class="ma-section-head">
 	<h2><c:out value="${listTitle}" /><span class="count" id="listCount" data-count="${paging.total}">${paging.total}건</span></h2>
@@ -22,12 +22,36 @@
 				<button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
 			</form>
 		</c:if>
-		<select id="cntPerPage" class="form-select" aria-label="한 페이지에 보여줄 개수">
+		<select id="cntPerPage" class="form-select" data-param="cntPerPage" aria-label="한 페이지에 보여줄 개수">
 			<c:forEach var="n" items="8,12,16,24">
 				<option value="${n}" ${paging.cntPerPage == n ? 'selected' : ''}>${n}개씩</option>
 			</c:forEach>
 		</select>
 		<a class="btn btn-primary" href="${user == null ? '/web/users/login' : '/web/aucts/productEnrollment'}"><i class="bi bi-plus-lg"></i> 상품 등록</a>
+	</div>
+</div>
+
+<%-- 상태 · 카테고리 · 정렬 (productList.js 가 data-param 값을 주소에 넣어 다시 불러온다) --%>
+<div class="ma-filters">
+	<div class="ma-tabs" role="tablist" aria-label="경매 상태">
+		<c:forEach var="s" items="all:전체,live:진행 중,ready:시작 전,ended:마감">
+			<c:set var="sv" value="${fn:substringBefore(s, ':')}" />
+			<button type="button" data-param="status" data-value="${sv}" class="${paging.status == sv ? 'on' : ''}">${fn:substringAfter(s, ':')}</button>
+		</c:forEach>
+	</div>
+	<div class="ma-filter-right">
+		<select class="form-select" data-param="cnum" aria-label="카테고리">
+			<option value="0">전체 카테고리</option>
+			<c:forEach var="cat" items="${categoryList}">
+				<option value="${cat.cnum}" ${paging.cnum == cat.cnum ? 'selected' : ''}><c:out value="${cat.category}" /></option>
+			</c:forEach>
+		</select>
+		<select class="form-select" data-param="sort" aria-label="정렬">
+			<c:forEach var="s" items="ending:마감 임박순,new:최신 등록순,price_asc:낮은 가격순,price_desc:높은 가격순,bids:입찰 많은 순">
+				<c:set var="sv" value="${fn:substringBefore(s, ':')}" />
+				<option value="${sv}" ${paging.sort == sv ? 'selected' : ''}>${fn:substringAfter(s, ':')}</option>
+			</c:forEach>
+		</select>
 	</div>
 </div>
 
@@ -58,7 +82,7 @@
 								</c:otherwise>
 							</c:choose>
 							<span class="auct-badge auct-badge-${fn:toLowerCase(status)}">
-								${status == 'LIVE' ? '진행 중' : (status == 'READY' ? '시작 전' : '마감')}
+								${product.end_chk == 'S' ? '낙찰' : (product.end_chk == 'U' ? '유찰' : (product.end_chk == 'B' ? '즉시구매' : (status == 'LIVE' ? '진행 중' : (status == 'READY' ? '시작 전' : '마감'))))}
 							</span>
 						</div>
 						<c:if test="${user != null}">
@@ -72,7 +96,7 @@
 								<a href="/web/aucts/productView?anum=${product.anum}"><c:out value="${product.prod_title}" /></a>
 							</h3>
 							<div class="auct-price">
-								<span>현재가</span>
+								<span>${product.end_chk == 'S' || product.end_chk == 'B' ? '낙찰가' : (product.end_chk == 'U' ? '시작가' : '현재가')}</span>
 								<strong><fmt:formatNumber value="${product.start_amt}" pattern="#,###" />원</strong>
 							</div>
 							<div class="auct-meta">

@@ -21,6 +21,8 @@
 							<li class="btn btn-outline-primary dropdown ms-3">
 							<span><c:out value="${user.name}" />님</span>
 								<ul class="dropdown-menu">
+									<li><a class="dropdown-item" href="/web/my"><i class="bi bi-person-circle me-1"></i>마이페이지</a></li>
+									<li><a class="dropdown-item" href="/web/my?tab=bids">내 입찰 내역</a></li>
 									<li><a class="dropdown-item" href="/web/aucts/index?key=A">내 등록 상품</a></li>
 									<li><a class="dropdown-item" href="/web/aucts/index?key=B">관심 상품</a></li>
 									<li><a class="dropdown-item" href="/web/aucts/productEnrollment">상품 등록</a></li>

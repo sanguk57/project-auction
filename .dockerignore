@@ -1,0 +1,8 @@
+target/
+logs/
+.git/
+.github/
+.vscode/
+.idea/
+config/app.properties
+src/main/webapp/resources/upload/

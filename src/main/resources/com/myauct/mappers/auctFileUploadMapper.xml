@@ -11,19 +11,38 @@
 	-->
 
 	<select id="fileList" resultType="AuctFileUploadDTO">
-		select * from `Auct_FileUpload` where anum = #{anum}
+		select * from `Auct_FileUpload` where anum = #{anum} order by sort_no, fnum
 	</select>
 
 	<select id="fileListByAnums" resultType="AuctFileUploadDTO">
 		select * from `Auct_FileUpload`
 		where anum in
 		<foreach collection="anums" item="anum" open="(" separator="," close=")">#{anum}</foreach>
+		order by anum, sort_no, fnum
 	</select>
 
-	<insert id="fileUpload">
-		insert into Auct_FileUpload (anum, upload_path, file_name, file_dname, file_ext)
-		values (#{anum}, #{upload_path}, #{file_name}, #{file_dname}, #{file_ext})
+	<insert id="fileUpload" useGeneratedKeys="true" keyProperty="fnum" keyColumn="fnum">
+		insert into Auct_FileUpload (anum, upload_path, file_name, file_dname, file_ext, sort_no)
+		values (#{anum}, #{upload_path}, #{file_name}, #{file_dname}, #{file_ext}, #{sort_no})
 	</insert>
+
+	<select id="maxSortNo" resultType="_int">
+		select coalesce(max(sort_no), -1) from Auct_FileUpload where anum = #{anum}
+	</select>
+
+	<select id="minSortNo" resultType="_int">
+		select coalesce(min(sort_no), 0) from Auct_FileUpload where anum = #{anum}
+	</select>
+
+	<update id="updateSortNo">
+		update Auct_FileUpload set sort_no = #{sortNo} where fnum = #{fnum} and anum = #{anum}
+	</update>
+
+	<delete id="deleteFiles">
+		delete from Auct_FileUpload
+		where anum = #{anum} and fnum in
+		<foreach collection="fnums" item="f" open="(" separator="," close=")">#{f}</foreach>
+	</delete>
 
 	<delete id="deleteFile">
 		delete from Auct_FileUpload where anum = #{anum}

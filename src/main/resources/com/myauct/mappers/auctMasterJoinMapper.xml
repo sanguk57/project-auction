@@ -10,7 +10,14 @@
 		지금: 방금 들어간 번호는 useGeneratedKeys 로 받고, 입찰자 수는 Auct_Master 에서 +1
 	-->
 	<insert id="auctionApplicant" useGeneratedKeys="true" keyProperty="jnum" keyColumn="jnum">
-		insert into Auct_Master_join (unum, anum, amount, volume)
-		values (#{unum}, #{anum}, #{amount}, #{volume})
+		insert into Auct_Master_join (unum, anum, amount, volume, join_gb)
+		values (#{unum}, #{anum}, #{amount}, #{volume}, #{join_gb})
 	</insert>
+
+	<select id="topBid" resultType="com.myauct.web.domain.auctmaster.dto.AuctMasterJoinDTO">
+		select * from Auct_Master_join
+		where anum = #{anum} and cancel_chk = 'N'
+		order by volume desc, jnum
+		limit 1
+	</select>
 </mapper>

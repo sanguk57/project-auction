@@ -19,4 +19,16 @@ public interface UserService {
 	boolean modifyUserPw(String rawPassword, int unum);
 
 	String getName(int unum);
+
+	/** 연락처 (이름 · 휴대폰 · 이메일, 비밀번호 제외). 탈퇴 회원이면 null */
+	UserDTO getContact(int unum);
+
+	/** 내 정보 수정 (이름 · 휴대폰 · 이메일 · 주소 · 성별). 수정된 정보(비밀번호 제외)를 돌려준다 */
+	UserDTO updateProfile(int unum, UserDTO form);
+
+	/** 현재 비밀번호를 확인한 뒤 변경 */
+	void changePassword(int unum, String currentPassword, String newPassword);
+
+	/** 비밀번호가 맞는지 */
+	boolean checkPassword(int unum, String rawPassword);
 }

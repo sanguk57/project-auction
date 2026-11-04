@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.myauct.web.domain.auctboard.dto.AuctBoardMemoDTO;
 import com.myauct.web.domain.auctboard.service.AuctBoardService;
@@ -21,6 +23,7 @@ import com.myauct.web.domain.auctcategory.dto.AuctCategoryDTO;
 import com.myauct.web.domain.auctcategory.service.AuctCategoryService;
 import com.myauct.web.domain.auctconcern.service.AuctConcernService;
 import com.myauct.web.domain.auctmaster.dto.SuggestDTO;
+import com.myauct.web.domain.auctmaster.service.AuctionEventHub;
 import com.myauct.web.domain.auctmaster.service.AuctMasterService;
 import com.myauct.web.domain.user.dto.UserDTO;
 import com.myauct.web.global.BusinessException;
@@ -42,6 +45,7 @@ public class RestAPIController {
 	private final AuctCategoryService auctCategoryService;
 	private final AuctConcernService auctConcernService;
 	private final AuctBoardService auctBoardService;
+	private final AuctionEventHub eventHub;
 
 	/** 목록 화면의 상품 썸네일 { "상품번호": ["경로", ...] } */
 	@PostMapping("/uploadAjaxAction")
@@ -62,6 +66,22 @@ public class RestAPIController {
 		int unum = requireLogin(user);
 		auctMasterService.bid(toInt(map, "anum"), unum, toInt(map, "start_amt"), toInt(map, "amount"));
 		return ResponseEntity.ok("입찰 완료");
+	}
+
+	/** 즉시구매 { anum, amount(수량) } */
+	@PostMapping("/buy_now")
+	public ResponseEntity<String> buyNow(@RequestBody Map<String, Object> map,
+			@SessionAttribute(name = SessionConst.LOGIN_USER, required = false) UserDTO user) {
+		int unum = requireLogin(user);
+		Object amount = map.get("amount");
+		auctMasterService.buyNow(toInt(map, "anum"), unum, amount == null ? 1 : toInt(map, "amount"));
+		return ResponseEntity.ok("즉시구매 완료");
+	}
+
+	/** 상세 화면 실시간 갱신 (Server-Sent Events): 입찰 · 즉시구매 · 마감이 생기면 바로 알려준다 */
+	@GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+	public SseEmitter stream(@RequestParam int anum) {
+		return eventHub.subscribe(anum);
 	}
 
 	@PostMapping("/product_category")

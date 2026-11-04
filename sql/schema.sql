@@ -45,6 +45,7 @@ CREATE TABLE User_List (
     gender      VARCHAR(10)      NULL                COMMENT '남자 / 여자',
     email       VARCHAR(100)     NULL                COMMENT '이메일',
     age         INT              NULL                COMMENT '나이 (현재연도 - 출생연도 + 1)',
+    del_yn      CHAR(1)      NOT NULL DEFAULT 'N'    COMMENT 'Y:탈퇴 (개인정보는 지우고 기록만 남김)',
     PRIMARY KEY (unum),
     UNIQUE KEY uk_user_id (user_id),
     KEY idx_user_name_phone (name, phone)             -- 아이디 찾기
@@ -88,13 +89,18 @@ CREATE TABLE Auct_Master (
     contents    TEXT             NULL                COMMENT '상품 설명',
     prod_img    VARCHAR(200)     NULL                COMMENT '(미사용) 대표 이미지',
     con_html    CHAR(1)      NOT NULL DEFAULT 'N'    COMMENT '(미사용) 설명 HTML 여부',
-    end_chk     CHAR(1)      NOT NULL DEFAULT 'N'    COMMENT '(미사용) 경매 종료 여부',
+    end_chk     CHAR(1)      NOT NULL DEFAULT 'N'    COMMENT 'N:진행(미처리) S:낙찰 U:유찰 B:즉시구매',
+    win_unum    INT              NULL                COMMENT '낙찰자 회원번호',
+    win_amt     INT              NULL                COMMENT '낙찰 가격',
+    end_date    DATETIME         NULL                COMMENT '낙찰/유찰 처리 시각',
     delete_chk  CHAR(1)      NOT NULL DEFAULT 'N'    COMMENT '(미사용) 삭제 여부',
     reg_date    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '등록일',
     PRIMARY KEY (anum),
     KEY idx_master_unum (unum),
     KEY idx_master_limit_amt (limit_amt),              -- 목록 정렬
     CONSTRAINT fk_master_user     FOREIGN KEY (unum) REFERENCES User_List (unum),
+    KEY idx_master_end (end_chk, auct_end),            -- 마감 처리 대상 찾기
+    CONSTRAINT fk_master_winner   FOREIGN KEY (win_unum) REFERENCES User_List (unum),
     CONSTRAINT fk_master_category FOREIGN KEY (cnum) REFERENCES Auct_Category (cnum)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '경매 상품';
 
@@ -111,6 +117,7 @@ CREATE TABLE Auct_FileUpload (
     file_name   VARCHAR(100) NOT NULL                COMMENT '원본 파일명 (확장자 제외)',
     file_dname  VARCHAR(50)  NOT NULL                COMMENT '저장시각_랜덤값',
     file_ext    VARCHAR(10)  NOT NULL                COMMENT '.jpg .png .gif',
+    sort_no     INT          NOT NULL DEFAULT 0      COMMENT '사진 순서 (작을수록 앞, 첫 번째가 대표 사진)',
     PRIMARY KEY (fnum),
     KEY idx_file_anum (anum),
     CONSTRAINT fk_file_master FOREIGN KEY (anum) REFERENCES Auct_Master (anum) ON DELETE CASCADE
