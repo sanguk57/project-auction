@@ -9,8 +9,14 @@
 		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
 		http://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx.xsd">
 
-	<!-- DB 접속정보 등은 깃에 올라가지 않는 app.properties 에서 읽어온다 -->
-	<context:property-placeholder location="classpath:config/app.properties" />
+	<!--
+		설정: WAR 안 기본값(app-default.properties) 위에 WAR 밖 실제 설정 파일을 덮어쓴다 (뒤에 적은 파일이 우선)
+		바깥 파일 위치: -Dmyauct.config 시스템 속성 > MYAUCT_CONFIG 환경변수 > C:/myauct/app.properties
+		바깥 파일이 없어도 서버는 뜨지만 DB 비밀번호가 비어 있어 접속이 실패한다 (ConfigReporter 가 로그로 알려줌)
+	-->
+	<context:property-placeholder
+		location="classpath:config/app-default.properties, file:${myauct.config:${MYAUCT_CONFIG:C:/myauct/app.properties}}"
+		ignore-resource-not-found="true" />
 
 	<!-- 커넥션 풀 (DriverManagerDataSource 는 요청마다 커넥션을 새로 만들어서 느림) -->
 	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">

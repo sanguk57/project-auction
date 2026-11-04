@@ -1,215 +1,184 @@
-const btn_idck = document.querySelector(".btn_idck");
-const inId = document.querySelector(".id");
-const pw = document.querySelector(".pw");
-const pw_rs = document.querySelector(".pw_rs");
-const btn_sm = document.querySelector(".btn_sm");
-const btn_pwck = document.querySelector(".btn_pwck");
-const tel_num = document.querySelector(".tel_num");
-const email = document.querySelector(".email");
-const name_input = document.querySelector(".name");
-const btn_addr = document.querySelector(".btn_addr")
+/*
+ * 회원가입 정보 입력 (users/register.jsp)
+ *
+ * 예전 코드의 문제
+ *  - "가입하기" 버튼이 전화번호 칸을 입력할 때만 켜져서, 입력 순서에 따라 가입이 안 됐음
+ *  - 전화번호는 "010-1234-5678" 형식만 통과 (하이픈 없이 쓰면 이유도 모른 채 실패)
+ *  - 이름 검사 정규식 오류로 "홍길동123" 도 통과, 생년월일은 서버 필수인데 선택처럼 보였음
+ *  - 성별을 고르지 않으면 "성별" 이라는 글자가 그대로 저장됐음
+ * 지금
+ *  - 버튼은 항상 누를 수 있고, 누르면 모든 칸을 검사해서 틀린 칸으로 이동
+ *  - 칸에서 벗어날 때(blur)마다 바로 결과 표시, 전화번호는 하이픈 자동 입력
+ *  - 아이디 · 비밀번호 규칙은 서버(UserController)와 같음
+ */
+(function () {
+	const $ = (id) => document.getElementById(id);
+	const form = $("registerForm");
 
-const name_ckTest = RegExp(/^[가-힣]{2,4}|[a-zA-Z]{2,10}\s[a-zA-Z]{2,10}$/);
-const email_chTest = RegExp(
-  /([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/
-);
-const pw_ckTest = RegExp(
-  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
-);
-const id_ckTest = RegExp(/^(?=.*\d)(?=.*[a-zA-Z])[0-9a-zA-Z]{8,12}$/);
-const tel_ckTest = RegExp(/^\d{3}-\d{3,4}-\d{4}$/);
+	const RULE = {
+		id: /^(?=.*\d)(?=.*[a-zA-Z])[0-9a-zA-Z]{8,12}$/,
+		pw: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+		name: /^([가-힣]{2,10}|[a-zA-Z]{2,20}( [a-zA-Z]{1,20}){0,2})$/,
+		phone: /^01[016789]-\d{3,4}-\d{4}$/,
+		email: /^[\w.+-]+@[\w-]+(\.[\w-]+)+$/,
+	};
 
-name_input.addEventListener("keyup", () => {
-  const name_value = name_input.value;
-
-  if (!name_ckTest.test(name_value)) {
-    name_input.className = "form-control name_input is-invalid";
-    document.querySelector(".name_ck").textContent = "이름 양식에 맞춰주세요";
-  } else {
-    name_input.className = "form-control email is-valid";
-  }
-  if (name_value === "") name_input.className = "form-control name_input";
-});
-
-email.addEventListener("keyup", () => {
-  const email_value = email.value;
-
-  if (!email_chTest.test(email_value)) {
-    email.className = "form-control email is-invalid";
-    // email.classList.add("is-invalid")
-    document.querySelector(".email_ck").textContent =
-      "이메일 양식에 맞춰주세요";
-  } else {
-    email.className = "form-control email is-valid";
-    // email.classList.add("is-valid")
-  }
-  if (email.value === "") email.className = "form-control email";
-  // email.classList.remove("is-invalid", "is-valid")
-});
-
-btn_pwck.addEventListener("click", (e) => {
-  if (e.target.checked) {
-    pw.type = "text";
-    pw_rs.type = "text";
-  } else {
-    pw.type = "password";
-    pw_rs.type = "password";
-  }
-});
-
-	function goPopup() {
-		var pop = window.open("/web/users/jusoPopup", "pop",
-				"width = 580, height = 300, top = 100, left = 450, scrollbars=yes, resizable=yes");
+	// 칸 아래 안내 문구 + 테두리 색
+	function show(id, ok, msg) {
+		const el = $(id);
+		const box = form.querySelector('.ma-msg[data-for="' + id + '"]');
+		el.classList.toggle("is-valid", ok === true);
+		el.classList.toggle("is-invalid", ok === false);
+		if (box) {
+			box.textContent = msg || "";
+			box.className = "ma-msg" + (ok === true ? " ok" : ok === false ? " bad" : "");
+		}
+		return ok !== false;
 	}
 
-	function jusoCallBack(roadFullAddr) {
-		// 팝업페이지에서 주소입력한 정보를 받아서, 현 페이지에 정보를 등록합니다.
-		document.getElementById('roadFullAddr').value = roadFullAddr;
+	// ---------- 아이디 ----------
+	const idInput = $("user_id");
+	let checkedId = null; // 중복 확인을 통과한 아이디
+
+	function validateIdFormat() {
+		const v = idInput.value.trim();
+		if (!v) return show("user_id", false, "아이디를 입력해주세요.");
+		if (!RULE.id.test(v)) return show("user_id", false, "영문과 숫자를 섞어 8~12자로 입력해주세요.");
+		if (checkedId === v) return show("user_id", true, "사용할 수 있는 아이디입니다.");
+		return show("user_id", null, "중복 확인을 눌러주세요.");
 	}
+	idInput.addEventListener("input", () => { checkedId = null; validateIdFormat(); });
 
-pw.addEventListener("keyup", () => {
-  const pw_value = pw.value;
+	function checkDuplicate() {
+		if (!validateIdFormat() || !RULE.id.test(idInput.value.trim())) return Promise.resolve(false);
+		const v = idInput.value.trim();
+		$("idCheckBtn").disabled = true;
+		return fetch("/web/rest/userIdChk", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ user_id: v }),
+		})
+			.then((res) => res.text())
+			.then((cnt) => {
+				// 결과가 오기 전에 아이디를 바꿨으면 예전 아이디의 결과는 버린다
+				if (idInput.value.trim() !== v) return validateIdFormat();
+				if (cnt.trim() === "0") {
+					checkedId = v;
+					return show("user_id", true, "사용할 수 있는 아이디입니다.");
+				}
+				checkedId = null;
+				return show("user_id", false, "이미 사용 중인 아이디입니다.");
+			})
+			.catch(() => show("user_id", false, "확인 중 오류가 났습니다. 다시 시도해주세요."))
+			.finally(() => ($("idCheckBtn").disabled = false));
+	}
+	$("idCheckBtn").addEventListener("click", checkDuplicate);
 
-  if (!pw_ckTest.test(pw_value)) {
-    pw.className = "form-control pw is-invalid";
-    //   pw.classList.add("is-invalid")
-    pw_rs.disabled = true;
-    document.querySelector(".pw_ck").textContent =
-      "사용할 수 없는 형식입니다..";
-    btn_sm.disabled = true;
-  } else {
-    pw.className = "form-control pw is-valid";
-    // pw.classList.remove("is-invalid")
-    // pw.classList.add("is-valid")
-    pw_rs.disabled = false;
-  }
-  if (!(pw_rs.value === "")) {
-    if (pw.value === pw_rs.value) {
-      pw_rs.className = "form-control pw_rs is-valid";
-      // pw_rs.classList.remove("is-invalid")
-      // pw_rs.classList.add("is-valid")
-      pw.className = "form-control pw is-valid";
-      // pw.classList.remove("is-invalid")
-      // pw.classList.add("is-valid")
-    } else if (!(pw.value === pw_rs.value)) {
-      pw.className = "form-control pw";
-      // pw.classList.remove("is-valid", "is-invalid")
-      pw_rs.className = "form-control pw_rs is-invalid";
-      // pw_rs.classList.add("is-invalid")
-      document.querySelector(".pwrs_ck").textContent =
-        "비밀번호가 일치하지 않습니다.";
-      btn_sm.disabled = true;
-    }
-  }
-  if (pw.value === "") pw.className = "form-control pw";
-  // pw.classList.remove("is-valid", "is-invalid")
-});
-pw_rs.addEventListener("keyup", () => {
-  // if(!pw_rs.value===null){
-  if (pw.value === pw_rs.value) {
-    pw_rs.className = "form-control pw_rs is-valid";
-    // pw_rs.classList.add("is-valid")
-    pw.className = "form-control pw is-valid";
-    // pw.classList.add("is-valid")
-  } else {
-    pw.className = "form-control pw";
-    // pw.classList.remove("is-valid", "is-invalid")
-    pw_rs.className = "form-control pw_rs is-invalid";
-    // pw_rs.classList.add("is-invalid")
-    document.querySelector(".pwrs_ck").textContent =
-      "비밀번호가 일치하지 않습니다.";
-    btn_sm.disabled = true;
-  }
-  // }
-});
+	// ---------- 비밀번호 ----------
+	const pw = $("password");
+	const pw2 = $("password2");
+	const rules = {
+		len: (v) => v.length >= 8,
+		alpha: (v) => /[A-Za-z]/.test(v),
+		digit: (v) => /\d/.test(v),
+		special: (v) => /[@$!%*#?&]/.test(v),
+	};
+	function validatePw() {
+		const v = pw.value;
+		document.querySelectorAll("#pwRules li").forEach((li) => li.classList.toggle("ok", rules[li.dataset.rule](v)));
+		const ok = RULE.pw.test(v);
+		pw.classList.toggle("is-valid", ok);
+		pw.classList.toggle("is-invalid", v !== "" && !ok);
+		return ok;
+	}
+	function validatePw2() {
+		if (!pw2.value) return show("password2", pw.value ? false : null, pw.value ? "비밀번호를 한 번 더 입력해주세요." : "");
+		return pw.value === pw2.value
+			? show("password2", true, "비밀번호가 일치합니다.")
+			: show("password2", false, "비밀번호가 일치하지 않습니다.");
+	}
+	pw.addEventListener("input", () => { validatePw(); if (pw2.value) validatePw2(); });
+	pw2.addEventListener("input", validatePw2);
 
-//클래스 포함 여부 확인 [포함시 : true | 미 포함시 : false 리턴]
-// element.classList.contains(포함 여부 확인할 클래스);
-btn_sm.addEventListener("click", (e) => {
-  if (
-    inId.classList.contains("is-valid") &&
-    pw.classList.contains("is-valid") &&
-    tel_num.classList.contains("is-valid") &&
-    name_input.classList.contains("is-valid")
-  ) {} else {
-    e.preventDefault();
-    alert("필수항목 확인해주세요");
-  }
-});
+	$("pwToggle").addEventListener("click", () => {
+		const hidden = pw.type === "password";
+		pw.type = pw2.type = hidden ? "text" : "password";
+		$("pwToggle").innerHTML = hidden ? '<i class="bi bi-eye-slash"></i> 숨기기' : '<i class="bi bi-eye"></i> 보기';
+	});
 
-btn_idck.addEventListener("click", () => {
-  const id = inId.value;
+	// ---------- 이름 · 생년월일 ----------
+	function validateName() {
+		const v = $("name").value.trim();
+		if (!v) return show("name", false, "이름을 입력해주세요.");
+		return RULE.name.test(v) ? show("name", true, "") : show("name", false, "한글 2~10자 또는 영문 이름으로 입력해주세요.");
+	}
+	function validateBirth() {
+		const v = $("birth").value;
+		if (!v) return show("birth", false, "생년월일을 선택해주세요.");
+		const d = new Date(v), now = new Date();
+		if (isNaN(d) || d > now || d.getFullYear() < 1900) return show("birth", false, "생년월일을 확인해주세요.");
+		return show("birth", true, "");
+	}
+	$("name").addEventListener("blur", validateName);
+	$("birth").addEventListener("change", validateBirth);
+	$("birth").max = new Date().toISOString().slice(0, 10);
 
-  fetch("/web/rest/userIdChk",{
-   method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    "user_id" : id,
-  }),
-}).then((response) => response.text()).then(funcData => {
-  console.log(funcData)
-  if(funcData == '0'){
-    inId.className = "form-control id is-valid";
-    document.querySelector(".valid-feedback").textContent = '사용가능한 아이디 입니다.';
-  }
-  else{
-    btn_sm.disabled = true;
-    inId.className = "form-control id is-invalid";
-    document.querySelector(".id_ck").textContent = '이미 사용중인 아이디 입니다.';
-  }
+	// ---------- 휴대폰 (하이픈 자동) · 이메일 ----------
+	const phone = $("phone");
+	phone.addEventListener("input", () => {
+		const d = phone.value.replace(/\D/g, "").slice(0, 11);
+		phone.value = d.length < 4 ? d : d.length < 8 ? d.slice(0, 3) + "-" + d.slice(3)
+			: d.slice(0, 3) + "-" + d.slice(3, d.length - 4) + "-" + d.slice(d.length - 4);
+		if (phone.classList.contains("is-invalid")) validatePhone();
+	});
+	function validatePhone() {
+		const v = phone.value.trim();
+		if (!v) return show("phone", false, "휴대폰 번호를 입력해주세요.");
+		return RULE.phone.test(v) ? show("phone", true, "") : show("phone", false, "올바른 휴대폰 번호가 아닙니다.");
+	}
+	phone.addEventListener("blur", validatePhone);
 
-})
-  
-  if (id === "") {
-    inId.className = "form-control id is-invalid";
-    // inId.classList.add("is-invalid")
-    document.querySelector(".id_ck").textContent = "아이디를 입력해주세요.";
-    btn_sm.disabled = true;
-  }
-});
+	function validateEmail() {
+		const v = $("email").value.trim();
+		if (!v) return show("email", null, "");
+		return RULE.email.test(v) ? show("email", true, "") : show("email", false, "이메일 형식을 확인해주세요.");
+	}
+	$("email").addEventListener("blur", validateEmail);
 
+	// ---------- 주소 ----------
+	$("addrBtn").addEventListener("click", () => {
+		window.open("/web/users/jusoPopup", "pop", "width=570,height=420,scrollbars=yes,resizable=yes");
+	});
+	window.jusoCallBack = (addr) => ($("roadFullAddr").value = addr);
 
-inId.addEventListener("keyup", () => {
-  const id = inId.value;
+	// ---------- 가입 ----------
+	form.addEventListener("submit", async (e) => {
+		e.preventDefault();
+		const results = [
+			["user_id", validateIdFormat() && RULE.id.test(idInput.value.trim())],
+			["password", validatePw()],
+			["password2", validatePw2()],
+			["name", validateName()],
+			["birth", validateBirth()],
+			["phone", validatePhone()],
+			["email", validateEmail()],
+		];
+		if (!pw.value) pw.classList.add("is-invalid");
 
-  inId.className = "form-control id";
-  // inId.classList.remove("is-invalid", "is-valid")
-  if (!id_ckTest.test(id)) {
-    inId.className = "form-control id is-invalid";
-    // inId.classList.add("is-invalid")
-    document.querySelector(".id_ck").textContent = "사용할 수 없는 형식입니다.";
-    btn_idck.disabled = true;
-    btn_sm.disabled = true;
-  } else {
-    inId.className = "form-control id";
-    // inId.classList.remove("is-invalid", "is-valid")
-    btn_idck.disabled = false;
-  }
-  if (id === "") inId.className = "form-control id";
-  // inId.classList.remove("is-invalid", "is-valid")
-});
+		// 아이디 형식이 맞는데 중복 확인을 안 했으면 대신 확인
+		if (results[0][1] && checkedId !== idInput.value.trim()) {
+			results[0][1] = await checkDuplicate();
+		}
 
-tel_num.addEventListener("keyup", () => {
-  const tel = tel_num.value;
-
-  if (
-    !tel_ckTest.test(tel) ||
-    !(pw.value === pw_rs.value) ||
-    pw_rs.value === ""
-  ) {
-    btn_sm.disabled = true;
-    tel_num.className = "form-control tel_num";
-  } else {
-    // 예전: "본인인증" 버튼이 브라우저에서 임의의 숫자를 만들어 자동으로 채워 넣기만 했음(실제 인증 없음) → 제거
-    tel_num.className = "form-control tel_num is-valid";
-    btn_sm.disabled = false;
-  }
-});
-
-if ((pw.value === "" || inId.value === "") || (tel_num === "" || inId.value === "")) {
-  btn_sm.disabled = true;
-  pw_rs.disabled = true;
-  btn_idck.disabled =  true;
-}
+		const firstBad = results.find(([, ok]) => !ok);
+		if (firstBad) {
+			const el = $(firstBad[0]);
+			el.scrollIntoView({ behavior: "smooth", block: "center" });
+			el.focus({ preventScroll: true });
+			return;
+		}
+		$("submitBtn").disabled = true; // 두 번 눌러 중복 가입되지 않게
+		$("submitBtn").innerHTML = '<span class="spinner-border spinner-border-sm"></span> 가입 중...';
+		form.submit();
+	});
+})();

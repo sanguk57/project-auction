@@ -21,7 +21,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.myauct.web.domain.user.dto.UserDTO;
 import com.myauct.web.global.SessionConst;
 
-/** DB 연결이 필요한 테스트 (로컬 MySQL + app.properties 필요) */
+/** DB 연결이 필요한 테스트 (로컬 MySQL + C:/myauct/app.properties 필요) */
 @SpringJUnitWebConfig(locations = { "file:src/main/webapp/WEB-INF/spring/root-context.xml",
 		"file:src/main/webapp/WEB-INF/spring/appServlet/servlet-context.xml" })
 public class RestAPIControllerTest {

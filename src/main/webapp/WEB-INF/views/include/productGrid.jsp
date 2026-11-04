@@ -14,7 +14,7 @@
 <c:set var="query" value="&cntPerPage=${paging.cntPerPage}&value=${fn:escapeXml(param.value)}&key=${fn:escapeXml(param.key)}" />
 
 <div class="ma-section-head">
-	<h2><c:out value="${listTitle}" /><span class="count">${paging.total}건</span></h2>
+	<h2><c:out value="${listTitle}" /><span class="count" id="listCount" data-count="${paging.total}">${paging.total}건</span></h2>
 	<div class="ma-toolbar">
 		<c:if test="${showSearch}">
 			<form action="${listPath}" method="get" class="form-search">
@@ -43,7 +43,7 @@
 		</div>
 	</c:when>
 	<c:otherwise>
-		<div class="row g-4" id="productGrid" data-login="${user != null}">
+		<div class="row g-4" id="productGrid" data-login="${user != null}" data-key="${fn:escapeXml(param.key)}">
 			<c:forEach var="product" items="${productList}">
 				<c:set var="status" value="${product.auct_status}" />
 				<div class="col-xl-3 col-lg-4 col-sm-6">

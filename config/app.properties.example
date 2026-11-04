@@ -1,0 +1,18 @@
+# =====================================================================
+#  MyAuct 설정 예시
+#   1) 이 파일을 C:/myauct/app.properties 로 복사 (폴더가 없으면 만들기)
+#   2) 아래 값을 채우고 톰캣을 (재)시작
+#   - 다른 위치를 쓰려면 톰캣 VM 옵션 -Dmyauct.config=경로 또는 환경변수 MYAUCT_CONFIG
+#   - 적지 않은 값은 WAR 안의 config/app-default.properties 기본값을 사용
+#   - 실제 파일은 깃에 올리지 말 것 (DB 비밀번호 · API 키 포함)
+# =====================================================================
+
+db.url=jdbc:log4jdbc:mysql://localhost:3306/kuk2028?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+db.username=kuk2028
+db.password=CHANGE_ME
+
+# 업로드한 상품 사진 저장 폴더 (웹앱 밖, 끝에 / 없이)
+upload.path=C:/myauct/upload
+
+# 도로명주소 검색 API 승인키 (https://business.juso.go.kr → API 신청 → 검색API 팝업)
+juso.confmKey=

@@ -23,7 +23,7 @@
 						<a href="index"><i class="bi bi-grid"></i>전체 경매 <strong>${cntMap.productCnt}</strong></a>
 						<c:if test="${user != null}">
 							<a href="index?key=A"><i class="bi bi-box-seam"></i>내 등록 상품 <strong>${cntMap.userProductCnt}</strong></a>
-							<a href="index?key=B"><i class="bi bi-heart"></i>관심 상품 <strong>${cntMap.concernCnt}</strong></a>
+							<a href="index?key=B"><i class="bi bi-heart"></i>관심 상품 <strong id="concernCount">${cntMap.concernCnt}</strong></a>
 							<span class="stat"><i class="bi bi-chat-dots"></i>내가 쓴 문의 <strong>${cntMap.userBoardCnt}</strong></span>
 						</c:if>
 					</div>

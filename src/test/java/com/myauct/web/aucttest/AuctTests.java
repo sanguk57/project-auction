@@ -11,7 +11,7 @@ import com.myauct.web.domain.auctmaster.service.AuctMasterService;
 
 import lombok.extern.slf4j.Slf4j;
 
-/** DB 연결이 필요한 테스트 (로컬 MySQL + app.properties 필요) */
+/** DB 연결이 필요한 테스트 (로컬 MySQL + C:/myauct/app.properties 필요) */
 @SpringJUnitConfig(locations = "file:src/main/webapp/WEB-INF/spring/root-context.xml")
 @Slf4j
 public class AuctTests {

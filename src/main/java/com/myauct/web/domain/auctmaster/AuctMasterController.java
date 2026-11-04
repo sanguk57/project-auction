@@ -3,6 +3,7 @@ package com.myauct.web.domain.auctmaster;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +42,9 @@ public class AuctMasterController {
 	private final AuctMasterService auctMasterService;
 	private final AuctConcernService auctConcernService;
 	private final AuctBoardService auctBoardService;
+
+	@Value("${juso.confmKey:}")
+	private String jusoKey;
 
 	@RequestMapping("/index")
 	public void index(@SessionAttribute(name = SessionConst.LOGIN_USER, required = false) UserDTO user,
@@ -98,8 +102,11 @@ public class AuctMasterController {
 		model.addAttribute("categoryList", auctCategoryService.getCategoryList());
 	}
 
+	/** 도로명주소 검색 팝업. 승인키는 app.properties 의 juso.confmKey (예전: JSP 에 키가 직접 적혀 있었음) */
 	@RequestMapping("/jusoPopup")
-	public void jusoPopup() {
+	public String jusoPopup(Model model) {
+		model.addAttribute("jusoKey", jusoKey);
+		return "aucts/jusoPopup";
 	}
 
 	/** 상품 등록 */

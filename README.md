@@ -46,7 +46,7 @@
    └─ global            로그인 검사 인터셉터, 공통 예외 처리, 세션 상수
   src/main/resources
    ├─ com/myauct/mappers  MyBatis 매퍼 XML
-   ├─ config              app.properties (DB 접속정보 · 업로드 경로, 깃 제외)
+   ├─ config              app-default.properties (비밀이 아닌 기본 설정)
    └─ logback.xml
   src/main/webapp/WEB-INF
    ├─ spring              root-context.xml (DB · 서비스), servlet-context.xml (MVC · 컨트롤러)
@@ -68,8 +68,10 @@
      ```
      - Windows 명령줄에서 실행할 때는 한글이 깨지지 않도록 `mysql --default-character-set=utf8mb4 -u root -p` 로 접속
      - 샘플 계정 : `seller01`(판매자) / `buyer001` / `buyer002`, 비밀번호는 모두 `test1234!`
-  3. **설정 파일** : `src/main/resources/config/app.properties.example` 을 같은 폴더에 `app.properties` 로 복사하고
-     DB 비밀번호와 업로드 폴더(`upload.path`)를 입력 (이 파일은 깃에 올라가지 않음)
+  3. **설정 파일** : `config/app.properties.example` 을 **`C:\myauct\app.properties`** 로 복사하고 DB 비밀번호 · 주소 검색 API 키 등을 입력
+     - WAR 밖 파일이라 값을 바꾼 뒤 **서버 재시작만** 하면 반영됨 (다시 빌드할 필요 없음), 비밀번호가 WAR 에 들어가지 않음
+     - 다른 위치를 쓰려면 톰캣 VM 옵션 `-Dmyauct.config=경로` 또는 환경변수 `MYAUCT_CONFIG`
+     - 서버 시작 로그에 읽은 설정 파일 위치와 빠진 값이 표시됨
   4. **빌드** : `mvn clean package -DskipTests` → `target/web.war` 생성
   5. **배포** : `web.war` 를 톰캣 `webapps` 에 넣거나, VS Code 의 Community Server Connectors 에서 Add Deployment
   6. **접속** : http://localhost:8080/web/
@@ -143,7 +145,13 @@
     - 전송 전 필수 항목 · 기간 · 즉시구매가 검사 후 해당 칸으로 이동, 두 번 눌러 중복 등록되는 것 방지
     - 카테고리를 화면을 그릴 때 함께 전달 (Ajax 요청 제거), 수정 화면에 현재 사진 표시
   - **로그인 · 회원가입 · 아이디 / 비밀번호 찾기** : 같은 카드 디자인으로 통일, "아이디 기억하기" 가 실제로 저장되도록 수정
-  - 주소 검색 팝업이 요청값을 자바스크립트에 그대로 출력하던 XSS 수정
+  - **회원가입 정보 입력** : 계정 · 기본 정보 · 연락처로 나눈 화면, 단계 표시(약관 동의 → 정보 입력 → 가입 완료)
+    - 칸마다 바로 결과 표시, 비밀번호 규칙 체크리스트, 휴대폰 번호 하이픈 자동 입력
+    - 입력 순서에 따라 가입 버튼이 켜지지 않던 문제, 이름 검사 정규식 오류, 성별 미선택 시 "성별" 이 저장되던 문제 수정
+    - 서버에서도 이름 · 휴대폰 번호 검사, 오류로 돌아오면 입력했던 값(비밀번호 제외)을 다시 채움
+    - 중복 확인 결과가 늦게 도착하면 바꾼 아이디에 이전 결과가 표시되던 문제 수정
+  - **찜(하트)** : 누르면 상단 "관심 상품 N" 이 바로 바뀜 (예전: 새로고침해야 반영), 관심 상품 목록에서 끄면 카드가 빠지고 건수도 줄어듦,
+    빠르게 여러 번 눌러도 요청은 한 번씩만
   - 실제 인증 없이 화면에서 임의 숫자를 채워 넣던 "본인인증" 버튼 제거
   - 썸네일을 원본의 1/3 → 최대 640px 로 만들어 카드 사진이 흐리게 보이던 문제 수정
   - 찜 하트를 외부(카카오) 이미지 대신 Bootstrap Icons 로 교체
@@ -155,9 +163,24 @@
     - 검색어로 시작하는 것을 먼저, 그다음 상품 수가 많은 순으로 최대 8개
     - 입력이 멈춘 뒤 0.2초 후 요청 · 이전 요청 취소로 결과가 뒤섞이지 않음
     - ↑ ↓ / Enter / Esc 키보드 조작, 일치하는 글자 강조
+    - 결과가 없으면 "일치하는 상품이 없어요" 안내, 한글 입력기(IME) 조합 중에도 동작하도록 input · keyup · compositionend 에서 확인
   - `sql/schema.sql`, `sql/sample-data.sql` : 테이블 생성 스크립트와 샘플 데이터
   - 공통 예외 처리(`GlobalExceptionHandler`), 사용자에게 보여줄 오류 메시지(`BusinessException`)
   - DB 없이 실행되는 단위 테스트 (파일 업로드 검사, 페이징)
+
+ #### 7. 설정 · 운영
+  - **설정 파일을 WAR 밖으로 분리**
+    | 파일 | 내용 | 깃 |
+    |---|---|---|
+    | WAR 안 `config/app-default.properties` | 비밀이 아닌 기본값 (DB 주소, 업로드 폴더 등) | 올림 |
+    | WAR 밖 `C:/myauct/app.properties` | 실제 값 (DB 비밀번호, 주소 검색 API 키) · 같은 항목이면 이 파일이 우선 | 올리지 않음 |
+    - 설정을 바꾼 뒤 서버 재시작만 하면 반영 (예전: 설정이 WAR 안에 복사돼서 매번 다시 빌드해야 했음)
+    - 위치 변경 : 톰캣 VM 옵션 `-Dmyauct.config=경로` 또는 환경변수 `MYAUCT_CONFIG`
+    - 서버 시작 시 `ConfigReporter` 가 읽은 설정 파일 위치 · 빠진 값(DB 비밀번호 등)을 로그로 알려줌
+  - **주소 검색 API** : JSP 두 곳에 서로 다른 키가 직접 적혀 있던 것을 `juso.confmKey` 설정 하나로 통일,
+    키가 없으면 팝업에서 "직접 입력" 안내
+  - 주소 검색 팝업이 요청값을 자바스크립트에 그대로 출력하던 XSS 수정
+  - 업로드 폴더 기본값을 웹앱 밖 `C:/myauct/upload` 로 변경
 
  ---
 

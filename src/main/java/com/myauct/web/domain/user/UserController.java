@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import jakarta.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +31,13 @@ public class UserController {
 	private static final Pattern PW_RULE = Pattern
 			.compile("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$");
 
+	private static final Pattern PHONE_RULE = Pattern.compile("^01[016789]-\\d{3,4}-\\d{4}$");
+
 	private final UserService userService;
+
+	/** 도로명주소 API 승인키 (app.properties 의 juso.confmKey) */
+	@Value("${juso.confmKey:}")
+	private String jusoKey;
 
 	@GetMapping("/login")
 	public void login() {
@@ -45,12 +52,24 @@ public class UserController {
 			if (dto.getPassword() == null || !PW_RULE.matcher(dto.getPassword()).matches()) {
 				throw BusinessException.badRequest("비밀번호 형식이 올바르지 않습니다.");
 			}
+			if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+				throw BusinessException.badRequest("이름을 입력해주세요.");
+			}
+			if (dto.getPhone() == null || !PHONE_RULE.matcher(dto.getPhone()).matches()) {
+				throw BusinessException.badRequest("휴대폰 번호를 확인해주세요. (예: 010-1234-5678)");
+			}
+			dto.setName(dto.getName().trim());
 			dto.setAge(calcAge(birth));
 			userService.userRegister(dto);
 		} catch (BusinessException e) {
 			ra.addFlashAttribute("errorMsg", e.getMessage());
+			// 입력했던 값은 다시 채워준다 (비밀번호는 보내지 않음)
+			dto.setPassword(null);
+			ra.addFlashAttribute("form", dto);
+			ra.addFlashAttribute("birth", birth);
 			return "redirect:/users/register";
 		}
+		ra.addFlashAttribute("joined", true);
 		return "redirect:/users/login";
 	}
 
@@ -95,7 +114,9 @@ public class UserController {
 	}
 
 	@RequestMapping("/jusoPopup")
-	public void jusoPopup() {
+	public String jusoPopup(Model model) {
+		model.addAttribute("jusoKey", jusoKey);
+		return "users/jusoPopup";
 	}
 
 	@GetMapping("/logout")

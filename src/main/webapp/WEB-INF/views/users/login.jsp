@@ -26,6 +26,11 @@
 		<p class="ma-auth-sub">로그인하고 경매에 참여하세요</p>
 		<main class="ma-auth-card">
 			<form>
+				<c:if test="${joined}">
+					<div class="alert alert-success d-flex gap-2 align-items-center py-2" role="alert">
+						<i class="bi bi-check-circle-fill"></i> 회원가입이 완료되었습니다. 로그인해주세요.
+					</div>
+				</c:if>
 				<div class="form-floating mb-3">
 					<input type="text" class="form-control id" id="floatingInput" placeholder="아이디" autocomplete="username">
 					<label for="floatingInput">아이디</label>
